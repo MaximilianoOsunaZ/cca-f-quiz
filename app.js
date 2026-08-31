@@ -12,7 +12,7 @@ function freshState() {
   return {
     schemaVersion: SCHEMA, preguntas: {}, tarjetas: {}, dias: {},
     racha: { actual: 0, mejor: 0, ultimoDiaCumplido: null },
-    settings: { metaDiaria: 20, apariencia: "auto" },
+    settings: { metaDiaria: 20, apariencia: "auto", idioma: "en" },
     bankVersionVista: null,
   };
 }
@@ -65,6 +65,18 @@ function temaStats() {
   return out;
 }
 function fuerzaPct(st) { return st.intentos ? Math.round((st.aciertos / st.intentos) * 100) : null; }
+function subStats() {
+  const out = {};
+  for (const c of Object.values(BANK.cursos || {}))
+    for (const s of c.subtemas) out[s.slug] = { intentos: 0, aciertos: 0, total: 0, vistas: 0 };
+  for (const q of BANK.preguntas) {
+    if (!q.sub || !out[q.sub]) continue;
+    out[q.sub].total++;
+    const p = S.preguntas[q.id];
+    if (p) { out[q.sub].vistas++; out[q.sub].intentos += p.intentos; out[q.sub].aciertos += p.aciertos; }
+  }
+  return out;
+}
 function temasDebiles() {
   const st = temaStats();
   return new Set(Object.keys(st).filter((t) => { const p = fuerzaPct(st[t]); return p !== null && p < 70; }));
@@ -74,7 +86,24 @@ function reincidentesElegibles() {
 }
 
 // ---------- Motor de feed ----------
-const feed = { mode: null, tema: null, cardsOnly: false, bag: [], cardBag: [], sinceCard: 0, cardTarget: 5, recent: [], current: null };
+const feed = { mode: null, tema: null, cardsOnly: false, bag: [], cardBag: [], sinceCard: 0, cardTarget: 5, recent: [], current: null, answered: null };
+
+// ---------- Idioma ----------
+function lang() { return (S.settings.idioma === "es") ? "es" : "en"; }
+function qStem(q) { return (lang() === "es" && q.stem_es) ? q.stem_es : q.stem; }
+function qOpts(q) { return (lang() === "es" && q.opciones_es) ? q.opciones_es : q.opciones; }
+function qScenTitle(e) { return (lang() === "es" && e.titulo_es) ? e.titulo_es : e.titulo; }
+function qScenText(e) { return (lang() === "es" && e.texto_es) ? e.texto_es : e.texto; }
+function updateLangBtn() {
+  const b = document.getElementById("btn-lang");
+  if (b) b.textContent = lang() === "es" ? "🌐 ES" : "🌐 EN";
+}
+function toggleLang() {
+  S.settings.idioma = lang() === "es" ? "en" : "es";
+  save(); updateLangBtn();
+  // re-renderiza el ítem actual conservando el estado (respuesta ya marcada, explicación visible)
+  if (feed.current && !feed.current.esCard) renderQuestion(feed.current.item);
+}
 
 function shuffle(a) { const x = [...a]; for (let i = x.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [x[i], x[j]] = [x[j], x[i]]; } return x; }
 
@@ -137,6 +166,7 @@ function nextItem() {
   }
   if (!item) { toast("No hay elementos para este modo todavía"); nav("home"); return; }
   feed.current = { item, esCard };
+  feed.answered = null;
   feed.recent.push(item.id); if (feed.recent.length > 5) feed.recent.shift();
   if (esCard) { feed.sinceCard = 0; feed.cardTarget = 4 + Math.floor(Math.random() * 3); renderCard(item); }
   else renderQuestion(item);
@@ -152,18 +182,18 @@ function updateFeedCount() {
 function renderQuestion(q) {
   const host = document.getElementById("feed-item");
   const scen = q.escenario
-    ? `<details class="scen"><summary>${q.escenario.titulo}</summary><p>${q.escenario.texto}</p></details>` : "";
+    ? `<details class="scen"><summary>${qScenTitle(q.escenario)}</summary><p>${qScenText(q.escenario)}</p></details>` : "";
   const letters = ["A", "B", "C", "D"];
   host.innerHTML = `${scen}
-    <p class="stem">${q.stem}</p>
-    <div class="opts">${q.opciones.map((o, i) =>
+    <p class="stem">${qStem(q)}</p>
+    <div class="opts">${qOpts(q).map((o, i) =>
       `<button class="optbtn" data-letter="${letters[i]}"><span class="letter">${letters[i]}</span><span>${o}</span></button>`).join("")}
     </div>
     <div id="expl-slot"></div>`;
   host.querySelectorAll(".optbtn").forEach((b) => b.addEventListener("click", () => answer(q, b.dataset.letter)));
+  if (feed.answered) paintResult(q, feed.answered.letter, feed.answered.ok);
 }
-function answer(q, letter) {
-  const ok = letter === q.correcta;
+function paintResult(q, letter, ok) {
   document.querySelectorAll(".optbtn").forEach((b) => {
     b.disabled = true;
     if (b.dataset.letter === q.correcta) b.classList.add("right");
@@ -172,6 +202,12 @@ function answer(q, letter) {
   });
   document.getElementById("expl-slot").innerHTML =
     `<div class="expl ${ok ? "" : "bad"}"><div class="verdict ${ok ? "ok" : "no"}">${ok ? "✔ ¡Correcto!" : "✘ Incorrecto"}</div>${q.explicacion}</div>`;
+}
+function answer(q, letter) {
+  if (feed.answered) return;
+  const ok = letter === q.correcta;
+  feed.answered = { letter, ok };
+  paintResult(q, letter, ok);
   const p = S.preguntas[q.id] || { caja: 0, intentos: 0, aciertos: 0, ultimoVisto: null, ultimoOk: null };
   p.intentos++; if (ok) { p.aciertos++; p.caja = Math.min(3, p.caja + 1); } else p.caja = 0;
   p.ultimoVisto = today(); p.ultimoOk = ok;
@@ -247,12 +283,32 @@ function renderDashboard() {
     <div class="stat"><div class="v">${intT ? Math.round((aciT / intT) * 100) + "%" : "—"}</div><div class="k">acierto global</div></div>
     <div class="stat"><div class="v">${vistasU}/${BANK.preguntas.length}</div><div class="k">preguntas vistas</div></div>`;
   const bars = document.getElementById("dash-bars");
-  bars.innerHTML = Object.entries(BANK.temas).map(([slug, t]) => {
-    const s = st[slug]; const p = fuerzaPct(s);
-    const color = p === null ? "var(--line)" : p >= 80 ? "var(--good)" : p >= 60 ? "var(--amber)" : "var(--bad)";
-    return `<div class="bar"><span>${t.nombre}</span>
-      <span class="track"><span class="fill" style="width:${p ?? 0}%;background:${color}"></span></span>
-      <span class="pct">${p === null ? "s/d" : p + "%"}</span></div>`;
+  const ss = subStats();
+  const colorDe = (p) => p === null ? "var(--line)" : p >= 80 ? "var(--good)" : p >= 60 ? "var(--amber)" : "var(--bad)";
+  bars.innerHTML = Object.entries(BANK.cursos || {}).map(([cslug, curso]) => {
+    let ci = 0, ca = 0, conPreguntas = false;
+    for (const sub of curso.subtemas) { ci += ss[sub.slug].intentos; ca += ss[sub.slug].aciertos; if (ss[sub.slug].total) conPreguntas = true; }
+    const cp = ci ? Math.round((ca / ci) * 100) : null;
+    const filas = curso.subtemas.map((sub) => {
+      const s = ss[sub.slug]; const p = fuerzaPct(s);
+      const porEstudiar = !s.total;
+      return `<details class="subrow ${porEstudiar ? "future" : ""}">
+        <summary>
+          <span class="subname">${sub.nombre}</span>
+          <span class="minibar"><span style="width:${p ?? 0}%;background:${colorDe(p)}"></span></span>
+          <span class="pct">${porEstudiar ? "por estudiar" : (p === null ? "s/d" : p + "%")}</span>
+        </summary>
+        <div class="subdesc">${sub.desc}${s.total ? `<div class="subcount">${s.total} pregunta${s.total === 1 ? "" : "s"} en el banco · ${s.vistas} vistas · ${s.intentos} intentos</div>` : ""}</div>
+      </details>`;
+    }).join("");
+    return `<details class="cursoacc" ${cslug !== "cx" ? "open" : ""}>
+      <summary class="cursohead">
+        <span class="cursoname">${curso.nombre}</span>
+        <span class="minibar big"><span style="width:${cp ?? 0}%;background:${colorDe(cp)}"></span></span>
+        <span class="pct">${conPreguntas ? (cp === null ? "s/d" : cp + "%") : "—"}</span>
+      </summary>
+      <div class="subrows">${filas}</div>
+    </details>`;
   }).join("");
   // top reincidentes
   const rein = reincidentesElegibles()
@@ -276,6 +332,13 @@ function buildCopyText() {
   lines.push(`CCA-F progreso — ${today()}`);
   lines.push(`Banco v${BANK.bankVersion} · ${BANK.preguntas.length} preguntas + ${BANK.tarjetas.length} tarjetas · Racha: ${S.racha.actual} días (mejor ${S.racha.mejor}; meta ${S.settings.metaDiaria}/día, hoy ${d.vistas})`);
   lines.push(`Global: ${vistasU} vistas únicas de ${BANK.preguntas.length} · ${intT} intentos · ${intT ? Math.round((aciT / intT) * 100) : 0}% acierto`);
+  const ss = subStats();
+  for (const [cslug, curso] of Object.entries(BANK.cursos || {})) {
+    if (cslug === "cx") continue;
+    let ci = 0, ca = 0;
+    for (const sub of curso.subtemas) { ci += ss[sub.slug].intentos; ca += ss[sub.slug].aciertos; }
+    lines.push(`Curso "${curso.nombre}": ${ci ? Math.round((ca / ci) * 100) + "% acierto · " + ci + " intentos" : "sin datos"}`);
+  }
   lines.push(`Por tema (acierto% · intentos · caja media):`);
   for (const [slug, t] of Object.entries(BANK.temas)) {
     const s = st[slug]; const p = fuerzaPct(s);
@@ -334,6 +397,8 @@ async function init() {
   document.querySelectorAll("[data-mode]").forEach((b) => b.addEventListener("click", () => startFeed(b.dataset.mode)));
   document.getElementById("btn-topics").addEventListener("click", () => document.getElementById("topiclist").classList.toggle("open"));
   document.getElementById("btn-next").addEventListener("click", nextItem);
+  document.getElementById("btn-lang").addEventListener("click", toggleLang);
+  updateLangBtn();
   document.getElementById("btn-copy").addEventListener("click", async () => {
     const text = buildCopyText();
     const out = document.getElementById("copy-out");

@@ -1,6 +1,6 @@
 {
- "schemaVersion": 1,
- "bankVersion": "2026-08-31.1",
+ "schemaVersion": 2,
+ "bankVersion": "2026-08-31.2",
  "temas": {
   "mecanismos": {
    "nombre": "Elección de mecanismo",
@@ -43,16 +43,136 @@
    "dominio": "Tool Design & MCP"
   }
  },
+ "cursos": {
+  "c1": {
+   "nombre": "Introduction to Agent Skills",
+   "subtemas": [
+    {
+     "slug": "c1-fundamentos",
+     "nombre": "Qué son las skills",
+     "desc": "Una skill es un directorio con un SKILL.md que le enseña algo a Claude una sola vez; se activa por matching semántico contra su description. Viven en 4 ubicaciones (enterprise, personal, project, plugins)."
+    },
+    {
+     "slug": "c1-anatomia",
+     "nombre": "Crear una skill",
+     "desc": "El frontmatter lleva name (máx 64 chars, = nombre de la carpeta) y description (máx 1,024, el criterio de matching); debajo van las instrucciones. Editar → reiniciar Claude Code; borrar = eliminar el directorio."
+    },
+    {
+     "slug": "c1-prioridad",
+     "nombre": "Prioridad y conflictos",
+     "desc": "Con nombres repetidos gana una sola: Enterprise → Personal → Project → Plugins (E-P-P-P). Personal le gana a Project. Para evitar conflictos: nombres descriptivos."
+    },
+    {
+     "slug": "c1-config",
+     "nombre": "Configuración avanzada",
+     "desc": "Campos opcionales: allowed-tools restringe herramientas mientras la skill está activa (omitirlo = sin restricción); model elige qué modelo la ejecuta."
+    },
+    {
+     "slug": "c1-pd",
+     "nombre": "Progressive disclosure",
+     "desc": "Tres niveles: metadata (siempre cargada) → instrucciones (al activarse) → recursos (solo si la tarea lo pide). references/ se LEEN, scripts/ se EJECUTAN (solo el output cuesta), assets/ se USAN. SKILL.md bajo ~500 líneas."
+    },
+    {
+     "slug": "c1-vs",
+     "nombre": "Skills vs otras features",
+     "desc": "La escalera de decisión: ¿falta acceso externo? MCP · ¿debe ocurrir ante un evento? Hook · ¿tarea grande que ensucia contexto? Subagent · ¿aplica siempre? CLAUDE.md · ¿conocimiento a veces? Skill. Se combinan, no compiten."
+    },
+    {
+     "slug": "c1-subagents",
+     "nombre": "Subagents",
+     "desc": "Otro Claude con contexto aislado: recibe una tarea, trabaja aparte y devuelve resultados. No heredan skills (se listan en skills:); los built-in (Explore, Plan, Verify) no pueden usarlas jamás; en subagents las skills cargan todas al arrancar."
+    },
+    {
+     "slug": "c1-sharing",
+     "nombre": "Compartir skills",
+     "desc": "Tres canales por alcance: commit al repo (equipo, updates con git pull) → plugin en marketplace (comunidad) → enterprise managed settings (obligatorio organización, keyword \"must\")."
+    },
+    {
+     "slug": "c1-ts",
+     "nombre": "Troubleshooting",
+     "desc": "Síntoma → arreglo: no dispara = description sin trigger phrases · no carga = directorio con nombre + SKILL.md exacto (claude --debug) · skill equivocada = descriptions muy parecidas · tapada = renombrar · runtime = dependencias, chmod +x, forward slashes. Primero siempre: el validator."
+    }
+   ]
+  },
+  "c4": {
+   "nombre": "Claude Code in Action",
+   "subtemas": [
+    {
+     "slug": "c4-steering",
+     "nombre": "Steering de sesiones largas",
+     "desc": "Acota primero (plan mode) y corrige durante: /compact dirigido (di qué conservar), rewind con checkpoints (doble Esc), /goal (el evaluador solo lee el transcript), /loop para estado externo, y worktrees para sesiones paralelas."
+    },
+    {
+     "slug": "c4-claudemd",
+     "nombre": "CLAUDE.md que se cumple",
+     "desc": "Es guidance, no enforcement: cada línea compite por atención — archivo flaco se cumple más. Los 4 archivos (managed, user, project, local) SE APILAN al arrancar. Los imports @ruta organizan pero NO reducen contexto. Hard rules → hooks."
+    },
+    {
+     "slug": "c4-permisos",
+     "nombre": "Permission modes",
+     "desc": "Seis modos: Manual, Accept edits, Plan, Auto (clasificador revisa cada acción — guarda intención, no corrección), Don't ask (pipelines sin humano: auto-deniega sin colgar) y Bypass (solo contenedor/VM aislado)."
+    },
+    {
+     "slug": "c4-hooks",
+     "nombre": "Hooks a fondo",
+     "desc": "Código determinista en puntos del loop: PreToolUse (puede bloquear o REESCRIBIR con updatedInput), PostToolUse, Stop (gate del turno), SessionStart+matcher compact (re-inyecta contexto). Exit 2 bloquea; exit 1 NO."
+    },
+    {
+     "slug": "c4-auto",
+     "nombre": "Routines y headless",
+     "desc": "El espectro de control: routines en la nube de Anthropic (cron/HTTP/GitHub, máx cada hora, ramas claude/) → claude -p (pipea como shell) → --bare (salta auto-discovery) → Agent SDK. Output estructurado en structured_output; multi-paso con session_id + --resume."
+    },
+    {
+     "slug": "c4-actions",
+     "nombre": "GitHub Actions y Code Review",
+     "desc": "Dos caminos: Code Review administrado (solo señala — nunca aprueba/bloquea, sin autofix; arreglo local con /code-review --fix) y el action DIY para hacer más que revisar (claude_args: max-turns + modo sin preguntas + tools mínimas)."
+    },
+    {
+     "slug": "c4-trust",
+     "nombre": "Confiar y verificar",
+     "desc": "\"The less you watched, the more you verify\": empieza por el diff (no el resumen), tests como gate cableado (Stop hook + exit 2), verificación de que ningún test fue debilitado, y segunda opinión fría de un subagent fresco."
+    },
+    {
+     "slug": "c4-plugins",
+     "nombre": "Plugins",
+     "desc": "Una unidad instalable (skills+agents+hooks+MCP). Corre con TUS privilegios: sus hooks se APILAN con los tuyos; su clave agent puede cambiar el hilo principal. Read before you install; reviewed ≠ trusted."
+    }
+   ]
+  },
+  "cx": {
+   "nombre": "Próximos temas",
+   "subtemas": [
+    {
+     "slug": "x-api",
+     "nombre": "Fundamentos de API",
+     "desc": "La base para el curso de la Claude API: ciclo request→response, JSON sobre HTTP, API key como credencial, tokens como unidad de medida y cobro, y SDK vs API (la librería que llena los formatos por ti)."
+    },
+    {
+     "slug": "x-mcp",
+     "nombre": "Tools y MCP",
+     "desc": "Model Context Protocol: cómo darle \"manos\" a Claude — servers, tools, resources y prompts. Curso pendiente de estudiar (18% del examen)."
+    },
+    {
+     "slug": "x-prompting",
+     "nombre": "Prompt Engineering",
+     "desc": "Técnicas de instrucción efectiva para Claude. Tema pendiente de estudiar (20% del examen)."
+    }
+   ]
+  }
+ },
  "preguntas": [
   {
    "id": "sim01-q01",
    "origen": "simulacro-01",
    "tema": "mecanismos",
    "subtema": "Elección de mecanismo",
+   "sub": "c1-vs",
    "curso": 1,
    "escenario": {
     "titulo": "Scenario A — Nortech Solutions",
-    "texto": "Nortech Solutions is a 12-developer consultancy standardizing how its teams use Claude Code across client projects. They are deciding where each piece of team knowledge and automation should live, and how to distribute it."
+    "texto": "Nortech Solutions is a 12-developer consultancy standardizing how its teams use Claude Code across client projects. They are deciding where each piece of team knowledge and automation should live, and how to distribute it.",
+    "titulo_es": "Escenario A — Nortech Solutions",
+    "texto_es": "Nortech Solutions es una consultora de 12 desarrolladores que está estandarizando cómo sus equipos usan Claude Code en proyectos de clientes. Están decidiendo dónde debe vivir cada pieza de conocimiento y automatización del equipo, y cómo distribuirla."
    },
    "stem": "Nortech wants two rules applied in <em>every</em> conversation in a client repo: \"use TypeScript strict mode\" and \"never commit directly to main.\" Where should these rules live?",
    "opciones": [
@@ -63,17 +183,27 @@
    ],
    "correcta": "C",
    "explicacion": "<b>C.</b> Reglas que aplican <b>siempre</b>, en toda conversación → CLAUDE.md (always-on). Una skill cargaría solo si hay matching (A); el hook de B imprime pero no gobierna el razonamiento continuo; el subagent (D) solo aplica al delegar.",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "Nortech quiere dos reglas aplicadas en <em>cada</em> conversación de un repo de cliente: \"usar TypeScript en modo estricto\" y \"nunca commitear directo a main\". ¿Dónde deben vivir estas reglas?",
+   "opciones_es": [
+    "Una skill cuya description mencione \"reglas de código y flujo de git\"",
+    "Un hook de SessionStart que imprima las reglas",
+    "El archivo CLAUDE.md del repositorio",
+    "Un subagent personalizado con las reglas en su system prompt"
+   ]
   },
   {
    "id": "sim01-q02",
    "origen": "simulacro-01",
    "tema": "mecanismos",
    "subtema": "Elección de mecanismo",
+   "sub": "c1-vs",
    "curso": 1,
    "escenario": {
     "titulo": "Scenario A — Nortech Solutions",
-    "texto": "Nortech Solutions is a 12-developer consultancy standardizing how its teams use Claude Code across client projects. They are deciding where each piece of team knowledge and automation should live, and how to distribute it."
+    "texto": "Nortech Solutions is a 12-developer consultancy standardizing how its teams use Claude Code across client projects. They are deciding where each piece of team knowledge and automation should live, and how to distribute it.",
+    "titulo_es": "Escenario A — Nortech Solutions",
+    "texto_es": "Nortech Solutions es una consultora de 12 desarrolladores que está estandarizando cómo sus equipos usan Claude Code en proyectos de clientes. Están decidiendo dónde debe vivir cada pieza de conocimiento y automatización del equipo, y cómo distribuirla."
    },
    "stem": "The team's release-notes procedure is a detailed 12-step process used about once per sprint. Developers complain that keeping it always loaded clutters the context. What should Nortech do?",
    "opciones": [
@@ -84,17 +214,27 @@
    ],
    "correcta": "B",
    "explicacion": "<b>B.</b> \"Detailed procedures that would clutter every conversation\" es una de las 3 razones literales para usar skills: carga on-demand cuando pides release notes. Acortarlo (A) pierde detalle; no es un evento (C) ni una herramienta externa (D).",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "El procedimiento de release notes del equipo es un proceso detallado de 12 pasos que se usa una vez por sprint. Los devs se quejan de que tenerlo siempre cargado ensucia el contexto. ¿Qué debería hacer Nortech?",
+   "opciones_es": [
+    "Dejarlo en CLAUDE.md pero acortarlo",
+    "Moverlo a una skill de proyecto en .claude/skills para que cargue on demand",
+    "Convertirlo en un hook de PostToolUse",
+    "Exponerlo como herramienta de un MCP server"
+   ]
   },
   {
    "id": "sim01-q03",
    "origen": "simulacro-01",
    "tema": "mecanismos",
    "subtema": "Elección de mecanismo",
+   "sub": "c1-vs",
    "curso": 1,
    "escenario": {
     "titulo": "Scenario A — Nortech Solutions",
-    "texto": "Nortech Solutions is a 12-developer consultancy standardizing how its teams use Claude Code across client projects. They are deciding where each piece of team knowledge and automation should live, and how to distribute it."
+    "texto": "Nortech Solutions is a 12-developer consultancy standardizing how its teams use Claude Code across client projects. They are deciding where each piece of team knowledge and automation should live, and how to distribute it.",
+    "titulo_es": "Escenario A — Nortech Solutions",
+    "texto_es": "Nortech Solutions es una consultora de 12 desarrolladores que está estandarizando cómo sus equipos usan Claude Code en proyectos de clientes. Están decidiendo dónde debe vivir cada pieza de conocimiento y automatización del equipo, y cómo distribuirla."
    },
    "stem": "Nortech's security team requires that a secret scanner runs before every git commit Claude executes — it may <em>never</em> be skipped, regardless of what the user asked. What guarantees this?",
    "opciones": [
@@ -105,17 +245,27 @@
    ],
    "correcta": "A",
    "explicacion": "<b>A.</b> \"Never be skipped\" = necesitas <b>garantía determinista</b> → hook (event-driven, puede incluso bloquear con exit code 2). Skills y CLAUDE.md dependen del criterio de Claude — probabilístico. <i>Tu regla: ¿frase o suceso? Esto es un suceso.</i>",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "El equipo de seguridad de Nortech exige que un escáner de secretos corra antes de cada git commit que ejecute Claude — no puede saltarse <em>nunca</em>, sin importar qué haya pedido el usuario. ¿Qué lo garantiza?",
+   "opciones_es": [
+    "Un hook PreToolUse con matcher sobre la llamada de commit",
+    "Una skill descrita como \"escanea secretos antes de commits\"",
+    "Una regla en CLAUDE.md: \"siempre escanea secretos antes de commitear\"",
+    "Entrenar a los devs para pedir el escaneo manualmente"
+   ]
   },
   {
    "id": "sim01-q04",
    "origen": "simulacro-01",
    "tema": "skills",
    "subtema": "Prioridad de skills",
+   "sub": "c1-prioridad",
    "curso": 1,
    "escenario": {
     "titulo": "Scenario A — Nortech Solutions",
-    "texto": "Nortech Solutions is a 12-developer consultancy standardizing how its teams use Claude Code across client projects. They are deciding where each piece of team knowledge and automation should live, and how to distribute it."
+    "texto": "Nortech Solutions is a 12-developer consultancy standardizing how its teams use Claude Code across client projects. They are deciding where each piece of team knowledge and automation should live, and how to distribute it.",
+    "titulo_es": "Escenario A — Nortech Solutions",
+    "texto_es": "Nortech Solutions es una consultora de 12 desarrolladores que está estandarizando cómo sus equipos usan Claude Code en proyectos de clientes. Están decidiendo dónde debe vivir cada pieza de conocimiento y automatización del equipo, y cómo distribuirla."
    },
    "stem": "A developer keeps a personal <code>code-review</code> skill in ~/.claude/skills. The client repo also ships a project <code>code-review</code> skill. When the developer asks for a review in that repo, what happens?",
    "opciones": [
@@ -126,17 +276,27 @@
    ],
    "correcta": "D",
    "explicacion": "<b>D.</b> Prioridad <b>E-P-P-P</b>: Enterprise → <b>Personal → Project</b> → Plugins. La trampa es A (\"más específico\"): la intuición falla, Personal gana a Project. No hay merge ni diálogo.",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "Un desarrollador mantiene una skill personal <code>code-review</code> en ~/.claude/skills. El repo del cliente también trae una skill de proyecto <code>code-review</code>. Cuando el dev pide una revisión en ese repo, ¿qué pasa?",
+   "opciones_es": [
+    "Aplica la del proyecto — la configuración del proyecto es más específica",
+    "Ambas skills se fusionan en un solo set de instrucciones",
+    "Claude Code reporta un conflicto y pide elegir",
+    "Aplica la personal — Personal está por encima de Project en el orden de prioridad"
+   ]
   },
   {
    "id": "sim01-q05",
    "origen": "simulacro-01",
    "tema": "skills",
    "subtema": "Distribución",
+   "sub": "c1-sharing",
    "curso": 1,
    "escenario": {
     "titulo": "Scenario A — Nortech Solutions",
-    "texto": "Nortech Solutions is a 12-developer consultancy standardizing how its teams use Claude Code across client projects. They are deciding where each piece of team knowledge and automation should live, and how to distribute it."
+    "texto": "Nortech Solutions is a 12-developer consultancy standardizing how its teams use Claude Code across client projects. They are deciding where each piece of team knowledge and automation should live, and how to distribute it.",
+    "titulo_es": "Escenario A — Nortech Solutions",
+    "texto_es": "Nortech Solutions es una consultora de 12 desarrolladores que está estandarizando cómo sus equipos usan Claude Code en proyectos de clientes. Están decidiendo dónde debe vivir cada pieza de conocimiento y automatización del equipo, y cómo distribuirla."
    },
    "stem": "Nortech wants every developer to receive the release-notes skill automatically, with updates arriving through their normal workflow. What's the simplest method?",
    "opciones": [
@@ -147,17 +307,27 @@
    ],
    "correcta": "B",
    "explicacion": "<b>B.</b> El método \"simplest\" de la lección 5: commit al repo — quien clona la recibe, `git pull` trae updates. Plugin (C) es para alcance multi-repo/comunidad; enterprise (D) para obligatoriedad organizacional.",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "Nortech quiere que cada desarrollador reciba la skill de release notes automáticamente, con actualizaciones llegando por su flujo normal de trabajo. ¿Cuál es el método más simple?",
+   "opciones_es": [
+    "Enviar la carpeta por correo y que cada dev la copie a ~/.claude/skills",
+    "Commitear la skill a .claude/skills en el repositorio — clonar y hacer pull la distribuyen",
+    "Publicarla como plugin en un marketplace público",
+    "Desplegarla vía enterprise managed settings"
+   ]
   },
   {
    "id": "sim01-q06",
    "origen": "simulacro-01",
    "tema": "skills",
    "subtema": "Distribución",
+   "sub": "c1-sharing",
    "curso": 1,
    "escenario": {
     "titulo": "Scenario A — Nortech Solutions",
-    "texto": "Nortech Solutions is a 12-developer consultancy standardizing how its teams use Claude Code across client projects. They are deciding where each piece of team knowledge and automation should live, and how to distribute it."
+    "texto": "Nortech Solutions is a 12-developer consultancy standardizing how its teams use Claude Code across client projects. They are deciding where each piece of team knowledge and automation should live, and how to distribute it.",
+    "titulo_es": "Escenario A — Nortech Solutions",
+    "texto_es": "Nortech Solutions es una consultora de 12 desarrolladores que está estandarizando cómo sus equipos usan Claude Code en proyectos de clientes. Están decidiendo dónde debe vivir cada pieza de conocimiento y automatización del equipo, y cómo distribuirla."
    },
    "stem": "A year later, Nortech's compliance department decides the security-review skill MUST be identical across the whole organization and no developer may override it with a same-named skill. What now?",
    "opciones": [
@@ -168,17 +338,27 @@
    ],
    "correcta": "C",
    "explicacion": "<b>C.</b> Keyword <b>\"MUST\"</b> + \"no override\" → enterprise managed settings: prioridad máxima, pisa personal/project/plugin del mismo nombre. Repo y plugin quedan por debajo de Personal en prioridad — un dev podría taparlas.",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "Un año después, el área de compliance decide que la skill de security-review DEBE ser idéntica en toda la organización y ningún dev puede taparla con una skill del mismo nombre. ¿Ahora qué?",
+   "opciones_es": [
+    "Publicarla como plugin en un marketplace interno",
+    "Commitearla al .claude/skills de cada repositorio",
+    "Desplegarla a toda la organización vía enterprise managed settings",
+    "Pedir a los devs que borren sus copias personales"
+   ]
   },
   {
    "id": "sim01-q07",
    "origen": "simulacro-01",
    "tema": "subagents",
    "subtema": "Subagents",
+   "sub": "c1-subagents",
    "curso": 1,
    "escenario": {
     "titulo": "Scenario A — Nortech Solutions",
-    "texto": "Nortech Solutions is a 12-developer consultancy standardizing how its teams use Claude Code across client projects. They are deciding where each piece of team knowledge and automation should live, and how to distribute it."
+    "texto": "Nortech Solutions is a 12-developer consultancy standardizing how its teams use Claude Code across client projects. They are deciding where each piece of team knowledge and automation should live, and how to distribute it.",
+    "titulo_es": "Escenario A — Nortech Solutions",
+    "texto_es": "Nortech Solutions es una consultora de 12 desarrolladores que está estandarizando cómo sus equipos usan Claude Code en proyectos de clientes. Están decidiendo dónde debe vivir cada pieza de conocimiento y automatización del equipo, y cómo distribuirla."
    },
    "stem": "Nortech builds a custom subagent, <code>release-auditor</code>, in .claude/agents and expects it to use the team's release-notes skill. The subagent never applies it. What's the most likely fix?",
    "opciones": [
@@ -189,17 +369,27 @@
    ],
    "correcta": "A",
    "explicacion": "<b>A.</b> El gotcha de la lección 5: los subagents nacen con contexto limpio y <b>no heredan skills</b> — hay que listarlas en `skills:`. D es la trampa: los <i>built-in</i> no pueden nunca, pero los <i>custom</i> sí, listándolas.",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "Nortech crea un subagent personalizado, <code>release-auditor</code>, en .claude/agents y espera que use la skill de release notes del equipo. El subagent nunca la aplica. ¿Cuál es el arreglo más probable?",
+   "opciones_es": [
+    "Listar la skill explícitamente en el campo skills: del frontmatter del agente — los subagents no heredan skills",
+    "Subir el campo model del agente a un modelo más grande",
+    "Agregar allowed-tools a la skill para que los subagents puedan accederla",
+    "Nada — los subagents nunca pueden usar skills"
+   ]
   },
   {
    "id": "sim01-q08",
    "origen": "simulacro-01",
    "tema": "troubleshooting",
    "subtema": "Troubleshooting",
+   "sub": "c1-ts",
    "curso": 1,
    "escenario": {
     "titulo": "Scenario B — DataFlow Inc.",
-    "texto": "DataFlow Inc. is rolling out a set of database-related skills to its analytics team. The rollout hits several problems that the team must diagnose and fix."
+    "texto": "DataFlow Inc. is rolling out a set of database-related skills to its analytics team. The rollout hits several problems that the team must diagnose and fix.",
+    "titulo_es": "Escenario B — DataFlow Inc.",
+    "texto_es": "DataFlow Inc. está desplegando un conjunto de skills de bases de datos para su equipo de analítica. El despliegue se topa con varios problemas que el equipo debe diagnosticar y arreglar."
    },
    "stem": "An engineer created <code>~/.claude/skills/SKILL.md</code> with valid frontmatter, but the skill never appears in the available skills list. Why?",
    "opciones": [
@@ -210,17 +400,27 @@
    ],
    "correcta": "B",
    "explicacion": "<b>B.</b> Requisito estructural de la lección 6: SKILL.md <b>dentro de un directorio con nombre</b>, nunca suelto en la raíz de skills/. El nombre correcto es justamente SKILL.md en mayúsculas (A al revés). Diagnóstico: `claude --debug`.",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "Un ingeniero creó <code>~/.claude/skills/SKILL.md</code> con frontmatter válido, pero la skill nunca aparece en la lista de skills disponibles. ¿Por qué?",
+   "opciones_es": [
+    "El archivo debe renombrarse a skill.md (minúsculas)",
+    "SKILL.md debe vivir dentro de un directorio con nombre (ej. ~/.claude/skills/sql-optimizer/SKILL.md), no en la raíz de skills",
+    "Las skills sin allowed-tools no se cargan",
+    "Las skills personales requieren empaquetarse como plugin para cargar"
+   ]
   },
   {
    "id": "sim01-q09",
    "origen": "simulacro-01",
    "tema": "troubleshooting",
    "subtema": "Troubleshooting",
+   "sub": "c1-ts",
    "curso": 1,
    "escenario": {
     "titulo": "Scenario B — DataFlow Inc.",
-    "texto": "DataFlow Inc. is rolling out a set of database-related skills to its analytics team. The rollout hits several problems that the team must diagnose and fix."
+    "texto": "DataFlow Inc. is rolling out a set of database-related skills to its analytics team. The rollout hits several problems that the team must diagnose and fix.",
+    "titulo_es": "Escenario B — DataFlow Inc.",
+    "texto_es": "DataFlow Inc. está desplegando un conjunto de skills de bases de datos para su equipo de analítica. El despliegue se topa con varios problemas que el equipo debe diagnosticar y arreglar."
    },
    "stem": "The <code>sql-optimizer</code> skill passes the validator and appears in the list, but asking \"why is this query slow?\" never triggers it. Its description reads: \"Optimizes SQL.\" What's the fix?",
    "opciones": [
@@ -231,17 +431,27 @@
    ],
    "correcta": "D",
    "explicacion": "<b>D.</b> \"No se dispara\" → la causa es <i>\"almost always the description\"</i>: el matching semántico necesita overlap con cómo pides las cosas. \"Optimizes SQL\" no se parece a \"why is this query slow?\".",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "La skill <code>sql-optimizer</code> pasa el validator y aparece en la lista, pero preguntar \"why is this query slow?\" nunca la dispara. Su description dice: \"Optimizes SQL.\" ¿Cuál es el arreglo?",
+   "opciones_es": [
+    "Renombrar la skill — una de mayor prioridad la está tapando",
+    "Dar permiso de ejecución a los scripts de la skill",
+    "Acortar el SKILL.md por debajo de 500 líneas",
+    "Ampliar la description con frases-disparador reales (\"why is this slow?\", \"make this query faster\") y probar variaciones"
+   ]
   },
   {
    "id": "sim01-q10",
    "origen": "simulacro-01",
    "tema": "troubleshooting",
    "subtema": "Troubleshooting",
+   "sub": "c1-ts",
    "curso": 1,
    "escenario": {
     "titulo": "Scenario B — DataFlow Inc.",
-    "texto": "DataFlow Inc. is rolling out a set of database-related skills to its analytics team. The rollout hits several problems that the team must diagnose and fix."
+    "texto": "DataFlow Inc. is rolling out a set of database-related skills to its analytics team. The rollout hits several problems that the team must diagnose and fix.",
+    "titulo_es": "Escenario B — DataFlow Inc.",
+    "texto_es": "DataFlow Inc. está desplegando un conjunto de skills de bases de datos para su equipo de analítica. El despliegue se topa con varios problemas que el equipo debe diagnosticar y arreglar."
    },
    "stem": "Claude keeps activating <code>db-review</code> when engineers want <code>sql-optimizer</code>, and vice versa. What does the course recommend?",
    "opciones": [
@@ -252,17 +462,27 @@
    ],
    "correcta": "A",
    "explicacion": "<b>A.</b> \"Wrong skill gets used\" → descriptions <b>demasiado parecidas</b>; hacerlas distintas. La especificidad ayuda al matching Y evita conflictos con skills de nombre/tema similar.",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "Claude sigue activando <code>db-review</code> cuando los ingenieros quieren <code>sql-optimizer</code>, y viceversa. ¿Qué recomienda el curso?",
+   "opciones_es": [
+    "Hacer las dos descriptions más distintas y específicas",
+    "Borrar una de las dos skills",
+    "Mover una a nivel enterprise para que la prioridad decida",
+    "Fusionar ambas en una sola skill"
+   ]
   },
   {
    "id": "sim01-q11",
    "origen": "simulacro-01",
    "tema": "troubleshooting",
    "subtema": "Troubleshooting",
+   "sub": "c1-ts",
    "curso": 1,
    "escenario": {
     "titulo": "Scenario B — DataFlow Inc.",
-    "texto": "DataFlow Inc. is rolling out a set of database-related skills to its analytics team. The rollout hits several problems that the team must diagnose and fix."
+    "texto": "DataFlow Inc. is rolling out a set of database-related skills to its analytics team. The rollout hits several problems that the team must diagnose and fix.",
+    "titulo_es": "Escenario B — DataFlow Inc.",
+    "texto_es": "DataFlow Inc. está desplegando un conjunto de skills de bases de datos para su equipo de analítica. El despliegue se topa con varios problemas que el equipo debe diagnosticar y arreglar."
    },
    "stem": "Per the course, what should the team try FIRST when a skill misbehaves, before spending time on any other debugging?",
    "opciones": [
@@ -273,17 +493,27 @@
    ],
    "correcta": "C",
    "explicacion": "<b>C.</b> <i>\"The first thing to try is the agent skills verifier command\"</i> — el validator atrapa problemas estructurales antes de perder tiempo. `claude --debug` (A) es el segundo paso, para errores de carga.",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "Según el curso, ¿qué debería intentar el equipo PRIMERO cuando una skill se porta mal, antes de gastar tiempo en cualquier otro debugging?",
+   "opciones_es": [
+    "Correr claude --debug y leer el log de arranque",
+    "Reinstalar Claude Code",
+    "Correr el skills validator (instalable con uv) para atrapar problemas estructurales",
+    "Limpiar el caché de plugins"
+   ]
   },
   {
    "id": "sim01-q12",
    "origen": "simulacro-01",
    "tema": "troubleshooting",
    "subtema": "Troubleshooting",
+   "sub": "c1-ts",
    "curso": 1,
    "escenario": {
     "titulo": "Scenario B — DataFlow Inc.",
-    "texto": "DataFlow Inc. is rolling out a set of database-related skills to its analytics team. The rollout hits several problems that the team must diagnose and fix."
+    "texto": "DataFlow Inc. is rolling out a set of database-related skills to its analytics team. The rollout hits several problems that the team must diagnose and fix.",
+    "titulo_es": "Escenario B — DataFlow Inc.",
+    "texto_es": "DataFlow Inc. está desplegando un conjunto de skills de bases de datos para su equipo de analítica. El despliegue se topa con varios problemas que el equipo debe diagnosticar y arreglar."
    },
    "stem": "A skill loads but its bundled script fails at runtime on Windows. The SKILL.md references <code>scripts\\check.py</code> and the file was copied without execute permission. Which pair of fixes does the course prescribe?",
    "opciones": [
@@ -294,17 +524,27 @@
    ],
    "correcta": "B",
    "explicacion": "<b>B.</b> Runtime errors: dependencias instaladas (y anotadas en la description) · <b>chmod +x</b> a los scripts · <b>forward slashes ( / ) en todas las rutas, incluso en Windows</b>. C destruiría la ventaja de contexto de los scripts.",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "Una skill carga pero su script incluido falla en runtime en Windows. El SKILL.md referencia <code>scripts\\check.py</code> y el archivo se copió sin permiso de ejecución. ¿Qué par de arreglos prescribe el curso?",
+   "opciones_es": [
+    "Renombrar SKILL.md a skill.md y reiniciar Claude Code",
+    "Usar forward slashes (scripts/check.py) en todos lados — incluso en Windows — y darle chmod +x al script",
+    "Pegar el código del script dentro de SKILL.md para no necesitar archivo",
+    "Mover el script a assets/ y referenciarlo desde la description"
+   ]
   },
   {
    "id": "sim01-q13",
    "origen": "simulacro-01",
    "tema": "skills",
    "subtema": "Configuración",
+   "sub": "c1-config",
    "curso": 1,
    "escenario": {
     "titulo": "Scenario B — DataFlow Inc.",
-    "texto": "DataFlow Inc. is rolling out a set of database-related skills to its analytics team. The rollout hits several problems that the team must diagnose and fix."
+    "texto": "DataFlow Inc. is rolling out a set of database-related skills to its analytics team. The rollout hits several problems that the team must diagnose and fix.",
+    "titulo_es": "Escenario B — DataFlow Inc.",
+    "texto_es": "DataFlow Inc. está desplegando un conjunto de skills de bases de datos para su equipo de analítica. El despliegue se topa con varios problemas que el equipo debe diagnosticar y arreglar."
    },
    "stem": "DataFlow needs an audit skill that can inspect code but must be structurally prevented from modifying any file while active. How?",
    "opciones": [
@@ -315,17 +555,27 @@
    ],
    "correcta": "D",
    "explicacion": "<b>D.</b> `allowed-tools` con lista de solo-lectura = guardrail estructural: sin editar, sin escribir. Una instrucción en prosa (A) es un consejo, no una barrera. Omitirlo (C) NO restringe nada — usa el modelo de permisos normal.",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "DataFlow necesita una skill de auditoría que pueda inspeccionar código pero que esté estructuralmente impedida de modificar archivos mientras esté activa. ¿Cómo?",
+   "opciones_es": [
+    "Escribir \"no edites archivos\" bien visible en las instrucciones de la skill",
+    "Poner model: haiku para que la skill sea menos capaz",
+    "Omitir allowed-tools para que Claude pida permiso por todo",
+    "Poner allowed-tools: Read, Grep, Glob en el frontmatter"
+   ]
   },
   {
    "id": "sim01-q14",
    "origen": "simulacro-01",
    "tema": "skills",
    "subtema": "Configuración",
+   "sub": "c1-config",
    "curso": 1,
    "escenario": {
     "titulo": "Scenario B — DataFlow Inc.",
-    "texto": "DataFlow Inc. is rolling out a set of database-related skills to its analytics team. The rollout hits several problems that the team must diagnose and fix."
+    "texto": "DataFlow Inc. is rolling out a set of database-related skills to its analytics team. The rollout hits several problems that the team must diagnose and fix.",
+    "titulo_es": "Escenario B — DataFlow Inc.",
+    "texto_es": "DataFlow Inc. está desplegando un conjunto de skills de bases de datos para su equipo de analítica. El despliegue se topa con varios problemas que el equipo debe diagnosticar y arreglar."
    },
    "stem": "Another skill's frontmatter has only name and description. What can Claude do with tools while that skill is active?",
    "opciones": [
@@ -336,17 +586,27 @@
    ],
    "correcta": "A",
    "explicacion": "<b>A.</b> Trampa clásica: omitir `allowed-tools` = <b>sin restricción</b> (modelo de permisos normal), no \"sin herramientas\". Solo restringe cuando el campo existe.",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "El frontmatter de otra skill solo tiene name y description. ¿Qué puede hacer Claude con herramientas mientras esa skill está activa?",
+   "opciones_es": [
+    "Lo que su modelo de permisos normal le permita — omitir allowed-tools no impone ninguna restricción",
+    "Nada — una skill sin allowed-tools no puede usar herramientas",
+    "Solo herramientas de lectura, por default",
+    "Solo las herramientas mencionadas dentro de las instrucciones de la skill"
+   ]
   },
   {
    "id": "sim01-q15",
    "origen": "simulacro-01",
    "tema": "mecanismos",
    "subtema": "Elección de mecanismo",
+   "sub": "c1-vs",
    "curso": 1,
    "escenario": {
     "titulo": "Scenario C — Vertex Analytics",
-    "texto": "Vertex Analytics is designing its Claude Code architecture from scratch: deciding which mechanism handles each need, and keeping the context window efficient as the setup grows."
+    "texto": "Vertex Analytics is designing its Claude Code architecture from scratch: deciding which mechanism handles each need, and keeping the context window efficient as the setup grows.",
+    "titulo_es": "Escenario C — Vertex Analytics",
+    "texto_es": "Vertex Analytics está diseñando su arquitectura de Claude Code desde cero: decidiendo qué mecanismo atiende cada necesidad y manteniendo eficiente el context window conforme crece el setup."
    },
    "stem": "Vertex wants Claude to run live queries against its production Postgres database during conversations. Which mechanism provides this?",
    "opciones": [
@@ -357,17 +617,27 @@
    ],
    "correcta": "B",
    "explicacion": "<b>B.</b> Lo que falta son <b>manos, no conocimiento</b>: acceso a un sistema externo → MCP (\"a different category entirely\"). Una skill (A) le enseñaría SQL, pero no le da por dónde entrar a la base.",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "Vertex quiere que Claude ejecute consultas en vivo contra su base Postgres de producción durante las conversaciones. ¿Qué mecanismo lo provee?",
+   "opciones_es": [
+    "Una skill con el esquema de la base y buenas prácticas de SQL",
+    "Un MCP server conectado a la base de datos",
+    "Un hook PostToolUse que corra consultas tras cada edición",
+    "Pegar el esquema en CLAUDE.md"
+   ]
   },
   {
    "id": "sim01-q16",
    "origen": "simulacro-01",
    "tema": "contexto",
    "subtema": "Context management",
+   "sub": "c1-pd",
    "curso": 1,
    "escenario": {
     "titulo": "Scenario C — Vertex Analytics",
-    "texto": "Vertex Analytics is designing its Claude Code architecture from scratch: deciding which mechanism handles each need, and keeping the context window efficient as the setup grows."
+    "texto": "Vertex Analytics is designing its Claude Code architecture from scratch: deciding which mechanism handles each need, and keeping the context window efficient as the setup grows.",
+    "titulo_es": "Escenario C — Vertex Analytics",
+    "texto_es": "Vertex Analytics está diseñando su arquitectura de Claude Code desde cero: decidiendo qué mecanismo atiende cada necesidad y manteniendo eficiente el context window conforme crece el setup."
    },
    "stem": "Vertex's main skill has grown to 2,200 lines; most of it is edge-case reference tables that rarely apply. Following the open standard, what should they do?",
    "opciones": [
@@ -378,17 +648,27 @@
    ],
    "correcta": "C",
    "explicacion": "<b>C.</b> <b>Progressive disclosure</b>: SKILL.md como índice (&lt;500 líneas) y el detalle en `references/` con condición explícita de carga. No se recorta contenido (D) — se decide <i>cuándo</i> entra. \"A table of contents in the context window.\"",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "La skill principal de Vertex creció a 2,200 líneas; la mayoría son tablas de referencia para casos raros. Siguiendo el estándar abierto, ¿qué deben hacer?",
+   "opciones_es": [
+    "Partirla en dos skills con nombres distintos",
+    "Poner un modelo más grande en el frontmatter para aguantar el largo",
+    "Mantener SKILL.md bajo ~500 líneas y mover las tablas a archivos de references/ enlazados con una condición explícita \"Only load when...\"",
+    "Reescribir las tablas como prosa más corta para bajar el conteo de líneas"
+   ]
   },
   {
    "id": "sim01-q17",
    "origen": "simulacro-01",
    "tema": "contexto",
    "subtema": "Context management",
+   "sub": "c1-pd",
    "curso": 1,
    "escenario": {
     "titulo": "Scenario C — Vertex Analytics",
-    "texto": "Vertex Analytics is designing its Claude Code architecture from scratch: deciding which mechanism handles each need, and keeping the context window efficient as the setup grows."
+    "texto": "Vertex Analytics is designing its Claude Code architecture from scratch: deciding which mechanism handles each need, and keeping the context window efficient as the setup grows.",
+    "titulo_es": "Escenario C — Vertex Analytics",
+    "texto_es": "Vertex Analytics está diseñando su arquitectura de Claude Code desde cero: decidiendo qué mecanismo atiende cada necesidad y manteniendo eficiente el context window conforme crece el setup."
    },
    "stem": "A monthly data normalization must produce byte-identical output every run, and the team wants it cheap in context. Best approach inside the skill?",
    "opciones": [
@@ -399,17 +679,27 @@
    ],
    "correcta": "A",
    "explicacion": "<b>A.</b> Dos razones de los scripts: <b>determinismo</b> (código probado = mismo resultado siempre; código generado varía) y <b>contexto</b> (solo el output consume — 300 líneas de código pueden costar 3 de salida).",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "Una normalización mensual de datos debe producir salida byte-idéntica en cada corrida, y el equipo la quiere barata en contexto. ¿Mejor enfoque dentro de la skill?",
+   "opciones_es": [
+    "Un script probado en scripts/, con SKILL.md instruyendo \"run the script, not read it\" — solo su output consume tokens",
+    "Instrucciones detalladas en SKILL.md para que Claude escriba el código de la transformación en cada corrida",
+    "Un archivo en references/ describiendo el algoritmo para que Claude lo siga",
+    "Un subagent con el modelo más capaz para minimizar errores"
+   ]
   },
   {
    "id": "sim01-q18",
    "origen": "simulacro-01",
    "tema": "subagents",
    "subtema": "Subagents",
+   "sub": "c1-subagents",
    "curso": 1,
    "escenario": {
     "titulo": "Scenario C — Vertex Analytics",
-    "texto": "Vertex Analytics is designing its Claude Code architecture from scratch: deciding which mechanism handles each need, and keeping the context window efficient as the setup grows."
+    "texto": "Vertex Analytics is designing its Claude Code architecture from scratch: deciding which mechanism handles each need, and keeping the context window efficient as the setup grows.",
+    "titulo_es": "Escenario C — Vertex Analytics",
+    "texto_es": "Vertex Analytics está diseñando su arquitectura de Claude Code desde cero: decidiendo qué mecanismo atiende cada necesidad y manteniendo eficiente el context window conforme crece el setup."
    },
    "stem": "Vertex needs to scan ~300 files for uses of a deprecated API and get a summary — without flooding the main conversation's context. Which mechanism?",
    "opciones": [
@@ -420,17 +710,27 @@
    ],
    "correcta": "D",
    "explicacion": "<b>D.</b> Lo que falta es <b>espacio</b>: tarea grande y cerrada → subagent. Los 300 archivos viven en SU contexto; a ti solo te llega el resumen. Una skill (A) sumaría conocimiento pero el trabajo seguiría inflando TU contexto.",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "Vertex necesita escanear ~300 archivos buscando usos de una API deprecada y obtener un resumen — sin inundar el contexto de la conversación principal. ¿Qué mecanismo?",
+   "opciones_es": [
+    "Una skill con instrucciones para buscar en el codebase",
+    "Un hook PreToolUse que haga grep en cada tool call",
+    "Una sección de CLAUDE.md listando las APIs deprecadas",
+    "Delegar a un subagent — trabaja en un contexto aislado y devuelve solo los resultados"
+   ]
   },
   {
    "id": "sim01-q19",
    "origen": "simulacro-01",
    "tema": "subagents",
    "subtema": "Subagents",
+   "sub": "c1-subagents",
    "curso": 1,
    "escenario": {
     "titulo": "Scenario C — Vertex Analytics",
-    "texto": "Vertex Analytics is designing its Claude Code architecture from scratch: deciding which mechanism handles each need, and keeping the context window efficient as the setup grows."
+    "texto": "Vertex Analytics is designing its Claude Code architecture from scratch: deciding which mechanism handles each need, and keeping the context window efficient as the setup grows.",
+    "titulo_es": "Escenario C — Vertex Analytics",
+    "texto_es": "Vertex Analytics está diseñando su arquitectura de Claude Code desde cero: decidiendo qué mecanismo atiende cada necesidad y manteniendo eficiente el context window conforme crece el setup."
    },
    "stem": "When a custom subagent declares skills: data-quality, sql-style in its frontmatter, when do those skills load?",
    "opciones": [
@@ -441,17 +741,27 @@
    ],
    "correcta": "B",
    "explicacion": "<b>B.</b> En subagents las skills cargan <b>al arrancar, todas completas</b> — no hay matching on-demand ni confirmación ahí. Por eso la regla: \"only list skills that are always relevant to the subagent's purpose\".",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "Cuando un subagent personalizado declara skills: data-quality, sql-style en su frontmatter, ¿cuándo cargan esas skills?",
+   "opciones_es": [
+    "On demand, cuando la tarea del subagent hace match con cada description",
+    "Todas al arrancar el subagent — por eso solo deben listarse skills siempre-relevantes",
+    "Solo después de que el usuario confirme cada skill",
+    "Nunca cargan — los subagents no pueden usar skills"
+   ]
   },
   {
    "id": "sim01-q20",
    "origen": "simulacro-01",
    "tema": "subagents",
    "subtema": "Subagents",
+   "sub": "c1-subagents",
    "curso": 1,
    "escenario": {
     "titulo": "Scenario C — Vertex Analytics",
-    "texto": "Vertex Analytics is designing its Claude Code architecture from scratch: deciding which mechanism handles each need, and keeping the context window efficient as the setup grows."
+    "texto": "Vertex Analytics is designing its Claude Code architecture from scratch: deciding which mechanism handles each need, and keeping the context window efficient as the setup grows.",
+    "titulo_es": "Escenario C — Vertex Analytics",
+    "texto_es": "Vertex Analytics está diseñando su arquitectura de Claude Code desde cero: decidiendo qué mecanismo atiende cada necesidad y manteniendo eficiente el context window conforme crece el setup."
    },
    "stem": "A Vertex engineer tries to make the built-in Explore agent use the team's review skill. What's the reality?",
    "opciones": [
@@ -462,17 +772,27 @@
    ],
    "correcta": "C",
    "explicacion": "<b>C.</b> Distinción de la lección 5: <b>built-in agents (Explore, Plan, Verify) no pueden usar skills en absoluto</b>; solo los custom subagents, y solo listándolas explícitamente.",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "Un ingeniero de Vertex intenta que el agente built-in Explore use la skill de revisión del equipo. ¿Cuál es la realidad?",
+   "opciones_es": [
+    "Funciona si la skill se lista en settings.json",
+    "Funciona si la skill se despliega a nivel enterprise",
+    "Imposible — los agentes built-in no pueden acceder a skills en absoluto; solo los subagents personalizados de .claude/agents pueden, listándolas",
+    "Funciona automáticamente porque Explore hereda el contexto principal"
+   ]
   },
   {
    "id": "sim02-q01",
    "origen": "simulacro-02",
    "tema": "claude-code",
    "subtema": "Steering",
+   "sub": "c4-steering",
    "curso": 4,
    "escenario": {
     "titulo": "Scenario A — Helix Labs",
-    "texto": "Helix Labs runs multi-hour Claude Code refactoring sessions on a large monorepo. The team is learning to steer long runs and to configure Claude so sessions stay on course without babysitting."
+    "texto": "Helix Labs runs multi-hour Claude Code refactoring sessions on a large monorepo. The team is learning to steer long runs and to configure Claude so sessions stay on course without babysitting.",
+    "titulo_es": "Escenario A — Helix Labs",
+    "texto_es": "Helix Labs corre sesiones de refactorización de varias horas con Claude Code sobre un monorepo grande. El equipo está aprendiendo a dirigir corridas largas y a configurar Claude para que las sesiones no se desvíen sin tener que vigilarlas."
    },
    "stem": "Three hours into a session the context window is nearly full. The debugging phase ended long ago; only the payment-API migration matters now. What's the best move?",
    "opciones": [
@@ -483,17 +803,27 @@
    ],
    "correcta": "B",
    "explicacion": "<b>B.</b> Lo que escribes después de <code>/compact</code> moldea el resumen — *\"your steering wheel for context\"*. A secas (A) arriesga que el resumen tire lo importante y Claude derive. Regla práctica: di qué CONSERVAR.",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "A tres horas de sesión, el context window está casi lleno. La fase de debugging terminó hace rato; ahora solo importa la migración del payment-API. ¿Cuál es la mejor jugada?",
+   "opciones_es": [
+    "Correr <code>/compact</code> sin nada más — el resumen se maneja solo",
+    "Correr <code>/compact Focus on the payment-API migration</code> para que el resumen conserve lo que importa",
+    "Abrir una sesión nueva y volver a explicar todo",
+    "Hacer rewind al primer checkpoint de la sesión"
+   ]
   },
   {
    "id": "sim02-q02",
    "origen": "simulacro-02",
    "tema": "claude-code",
    "subtema": "Steering",
+   "sub": "c4-steering",
    "curso": 4,
    "escenario": {
     "titulo": "Scenario A — Helix Labs",
-    "texto": "Helix Labs runs multi-hour Claude Code refactoring sessions on a large monorepo. The team is learning to steer long runs and to configure Claude so sessions stay on course without babysitting."
+    "texto": "Helix Labs runs multi-hour Claude Code refactoring sessions on a large monorepo. The team is learning to steer long runs and to configure Claude so sessions stay on course without babysitting.",
+    "titulo_es": "Escenario A — Helix Labs",
+    "texto_es": "Helix Labs corre sesiones de refactorización de varias horas con Claude Code sobre un monorepo grande. El equipo está aprendiendo a dirigir corridas largas y a configurar Claude para que las sesiones no se desvíen sin tener que vigilarlas."
    },
    "stem": "Claude took a wrong approach three prompts ago and edited several files since. You want both the files AND the conversation back to that point. What do you do?",
    "opciones": [
@@ -504,17 +834,27 @@
    ],
    "correcta": "D",
    "explicacion": "<b>D.</b> Cada prompt tuyo crea un checkpoint; doble Escape abre el menú rewind, y \"Restore code and conversation\" regresa AMBOS. /compact nunca toca archivos; git reset (B) deja el chat contaminado con el enfoque malo.",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "Claude tomó un enfoque equivocado hace tres prompts y desde entonces editó varios archivos. Quieres los archivos Y la conversación de vuelta a ese punto. ¿Qué haces?",
+   "opciones_es": [
+    "Correr <code>/compact</code> apuntando a ese punto anterior",
+    "Correr git reset tú mismo y seguir chateando",
+    "Elegir \"Summarize from here\" en el menú de rewind",
+    "Doble Escape en un prompt vacío y elegir \"Restore code and conversation\""
+   ]
   },
   {
    "id": "sim02-q03",
    "origen": "simulacro-02",
    "tema": "claude-code",
    "subtema": "Steering",
+   "sub": "c4-steering",
    "curso": 4,
    "escenario": {
     "titulo": "Scenario A — Helix Labs",
-    "texto": "Helix Labs runs multi-hour Claude Code refactoring sessions on a large monorepo. The team is learning to steer long runs and to configure Claude so sessions stay on course without babysitting."
+    "texto": "Helix Labs runs multi-hour Claude Code refactoring sessions on a large monorepo. The team is learning to steer long runs and to configure Claude so sessions stay on course without babysitting.",
+    "titulo_es": "Escenario A — Helix Labs",
+    "texto_es": "Helix Labs corre sesiones de refactorización de varias horas con Claude Code sobre un monorepo grande. El equipo está aprendiendo a dirigir corridas largas y a configurar Claude para que las sesiones no se desvíen sin tener que vigilarlas."
    },
    "stem": "The team wants Claude to keep working until the job is truly finished. Given that the /goal evaluator only reads the transcript, which condition will actually work?",
    "opciones": [
@@ -525,17 +865,27 @@
    ],
    "correcta": "C",
    "explicacion": "<b>C.</b> El evaluador solo lee la transcripción: la condición debe ser <b>verificable en el output</b> que Claude imprime (resultados de tests, type checker). \"Se siente mejor\" no aparece en ningún output.",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "El equipo quiere que Claude siga trabajando hasta terminar de verdad. Dado que el evaluador de /goal solo lee el transcript, ¿qué condición SÍ funciona?",
+   "opciones_es": [
+    "<code>/goal the UI feels snappier</code>",
+    "<code>/goal the code quality is clearly better</code>",
+    "<code>/goal pytest reports 0 failures and mypy reports 0 errors</code>",
+    "<code>/goal our users are happier with the app</code>"
+   ]
   },
   {
    "id": "sim02-q04",
    "origen": "simulacro-02",
    "tema": "claude-code",
    "subtema": "Steering",
+   "sub": "c4-steering",
    "curso": 4,
    "escenario": {
     "titulo": "Scenario A — Helix Labs",
-    "texto": "Helix Labs runs multi-hour Claude Code refactoring sessions on a large monorepo. The team is learning to steer long runs and to configure Claude so sessions stay on course without babysitting."
+    "texto": "Helix Labs runs multi-hour Claude Code refactoring sessions on a large monorepo. The team is learning to steer long runs and to configure Claude so sessions stay on course without babysitting.",
+    "titulo_es": "Escenario A — Helix Labs",
+    "texto_es": "Helix Labs corre sesiones de refactorización de varias horas con Claude Code sobre un monorepo grande. El equipo está aprendiendo a dirigir corridas largas y a configurar Claude para que las sesiones no se desvíen sin tener que vigilarlas."
    },
    "stem": "Two parallel Claude sessions on the same repo keep overwriting each other's files, and when the team tried separate copies, the new tree lacked the git-ignored <code>.env</code> file and nothing ran. What's the correct setup?",
    "opciones": [
@@ -546,17 +896,27 @@
    ],
    "correcta": "A",
    "explicacion": "<b>A.</b> Worktrees = árboles independientes (\"despensa común, cocinas separadas\"), y <code>.worktreeinclude</code> existe exactamente para copiar archivos git-ignored (.env, config local) a cada árbol nuevo. Commitear secretos (C) viola toda práctica — y el CLAUDE.md de tu propia maqueta.",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "Dos sesiones paralelas de Claude en el mismo repo se sobrescriben archivos, y cuando probaron copias separadas, el árbol nuevo no tenía el <code>.env</code> (git-ignored) y nada corría. ¿Cuál es el setup correcto?",
+   "opciones_es": [
+    "Correr cada sesión en su propio worktree, y listar <code>.env</code> en un archivo <code>.worktreeinclude</code> en la raíz del repo",
+    "Mantener ambas sesiones en la misma carpeta pero en modo accept-edits",
+    "Commitear el archivo .env para que toda copia lo tenga",
+    "Alternar las sesiones a mano para que solo corra una a la vez"
+   ]
   },
   {
    "id": "sim02-q05",
    "origen": "simulacro-02",
    "tema": "claude-code",
    "subtema": "CLAUDE.md",
+   "sub": "c4-claudemd",
    "curso": 4,
    "escenario": {
     "titulo": "Scenario A — Helix Labs",
-    "texto": "Helix Labs runs multi-hour Claude Code refactoring sessions on a large monorepo. The team is learning to steer long runs and to configure Claude so sessions stay on course without babysitting."
+    "texto": "Helix Labs runs multi-hour Claude Code refactoring sessions on a large monorepo. The team is learning to steer long runs and to configure Claude so sessions stay on course without babysitting.",
+    "titulo_es": "Escenario A — Helix Labs",
+    "texto_es": "Helix Labs corre sesiones de refactorización de varias horas con Claude Code sobre un monorepo grande. El equipo está aprendiendo a dirigir corridas largas y a configurar Claude para que las sesiones no se desvíen sin tener que vigilarlas."
    },
    "stem": "A developer has a User CLAUDE.md, the repo has Project and Local files, and the org deploys a managed policy file. At launch, what does Claude Code load?",
    "opciones": [
@@ -567,17 +927,27 @@
    ],
    "correcta": "C",
    "explicacion": "<b>C.</b> El contraste clave con skills: los CLAUDE.md <b>no compiten — se apilan</b> (\"they stack, nothing gets dropped\"). La prioridad E-P-P-P es de skills con nombre repetido, no de CLAUDE.md.",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "Un dev tiene CLAUDE.md de usuario, el repo tiene archivos Project y Local, y la org despliega un managed policy. Al arrancar, ¿qué carga Claude Code?",
+   "opciones_es": [
+    "Solo el de mayor prioridad — managed policy gana y el resto se descarta",
+    "Project pisa a User; Local pisa a Project",
+    "Los cuatro cargan juntos y se apilan — nada se descarta",
+    "El usuario elige uno al iniciar la sesión"
+   ]
   },
   {
    "id": "sim02-q06",
    "origen": "simulacro-02",
    "tema": "claude-code",
    "subtema": "CLAUDE.md",
+   "sub": "c4-claudemd",
    "curso": 4,
    "escenario": {
     "titulo": "Scenario A — Helix Labs",
-    "texto": "Helix Labs runs multi-hour Claude Code refactoring sessions on a large monorepo. The team is learning to steer long runs and to configure Claude so sessions stay on course without babysitting."
+    "texto": "Helix Labs runs multi-hour Claude Code refactoring sessions on a large monorepo. The team is learning to steer long runs and to configure Claude so sessions stay on course without babysitting.",
+    "titulo_es": "Escenario A — Helix Labs",
+    "texto_es": "Helix Labs corre sesiones de refactorización de varias horas con Claude Code sobre un monorepo grande. El equipo está aprendiendo a dirigir corridas largas y a configurar Claude para que las sesiones no se desvíen sin tener que vigilarlas."
    },
    "stem": "A teammate split a 1,200-line CLAUDE.md into six files loaded with <code>@.claude/conventions/...</code> imports and claims the context load dropped dramatically. What's the reality?",
    "opciones": [
@@ -588,17 +958,27 @@
    ],
    "correcta": "B",
    "explicacion": "<b>B.</b> 🪤 La trampa perfecta: suena a progressive disclosure pero es lo contrario. *\"Use imports to organize, not to shrink the load.\"* La carga diferida real es de las skills, no de los imports de CLAUDE.md.",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "Un compañero partió un CLAUDE.md de 1,200 líneas en seis archivos cargados con imports <code>@.claude/conventions/...</code> y asegura que la carga de contexto bajó muchísimo. ¿Cuál es la realidad?",
+   "opciones_es": [
+    "Correcto — los archivos importados cargan solo cuando una tarea los necesita",
+    "Falso — los imports se expanden inline al arrancar; organizan el contenido pero todo carga igual desde el inicio",
+    "Correcto — los imports cargan solo name y description, como las skills",
+    "Falso — Claude Code ignora los imports por completo"
+   ]
   },
   {
    "id": "sim02-q07",
    "origen": "simulacro-02",
    "tema": "claude-code",
    "subtema": "Verificación",
+   "sub": "c4-trust",
    "curso": 4,
    "escenario": {
     "titulo": "Scenario A — Helix Labs",
-    "texto": "Helix Labs runs multi-hour Claude Code refactoring sessions on a large monorepo. The team is learning to steer long runs and to configure Claude so sessions stay on course without babysitting."
+    "texto": "Helix Labs runs multi-hour Claude Code refactoring sessions on a large monorepo. The team is learning to steer long runs and to configure Claude so sessions stay on course without babysitting.",
+    "titulo_es": "Escenario A — Helix Labs",
+    "texto_es": "Helix Labs corre sesiones de refactorización de varias horas con Claude Code sobre un monorepo grande. El equipo está aprendiendo a dirigir corridas largas y a configurar Claude para que las sesiones no se desvíen sin tener que vigilarlas."
    },
    "stem": "Helix's verification skill runs the test suite after each refactor and everything is green — yet a bug shipped because a test had been quietly loosened to always pass. Per the course, what step was missing?",
    "opciones": [
@@ -609,17 +989,27 @@
    ],
    "correcta": "A",
    "explicacion": "<b>A.</b> La cadena completa: correr tests → <b>leer el diff</b> → verificar que ningún test fue debilitado → reportar con evidencia. Verde no basta: *\"Done is the gates being run and observed.\"*",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "La skill de verificación de Helix corre la suite de tests tras cada refactor y todo está en verde — pero un bug llegó a producción porque un test fue aflojado en silencio para pasar siempre. Según el curso, ¿qué paso faltó?",
+   "opciones_es": [
+    "Leer el diff para verificar que ningún test fue debilitado solo para que pasara",
+    "Correr los tests dos veces para confirmar los resultados",
+    "Usar un modelo más grande para la skill de verificación",
+    "Pedirle a Claude que resuma lo que cambió"
+   ]
   },
   {
    "id": "sim02-q08",
    "origen": "simulacro-02",
    "tema": "hooks-permisos",
    "subtema": "Permission modes",
+   "sub": "c4-permisos",
    "curso": 4,
    "escenario": {
     "titulo": "Scenario B — Meridian Ops",
-    "texto": "Meridian Ops is moving its repetitive work to unattended automation: overnight jobs, CI pipelines, and scheduled audits, with guardrails that hold when nobody is watching."
+    "texto": "Meridian Ops is moving its repetitive work to unattended automation: overnight jobs, CI pipelines, and scheduled audits, with guardrails that hold when nobody is watching.",
+    "titulo_es": "Escenario B — Meridian Ops",
+    "texto_es": "Meridian Ops está migrando su trabajo repetitivo a automatización desatendida: jobs nocturnos, pipelines de CI y auditorías programadas, con guardrails que aguanten cuando nadie está mirando."
    },
    "stem": "An overnight pipeline runs Claude Code with no human available. Any action outside the pre-approved tool list should be denied immediately so the pipeline never hangs waiting for approval. Which permission mode?",
    "opciones": [
@@ -630,17 +1020,27 @@
    ],
    "correcta": "D",
    "explicacion": "<b>D.</b> \"Don't ask\": solo tools pre-aprobadas; lo demás se <b>auto-deniega sin prompt</b> — el pipeline sigue avanzando. Ese es el punto: sin humano, un prompt de aprobación = pipeline colgado.",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "Un pipeline nocturno corre Claude Code sin ningún humano disponible. Cualquier acción fuera de la lista pre-aprobada debe denegarse de inmediato para que el pipeline nunca se quede colgado esperando aprobación. ¿Qué permission mode?",
+   "opciones_es": [
+    "Manual",
+    "Accept edits",
+    "Bypass permissions",
+    "Don't ask"
+   ]
   },
   {
    "id": "sim02-q09",
    "origen": "simulacro-02",
    "tema": "hooks-permisos",
    "subtema": "Permission modes",
+   "sub": "c4-permisos",
    "curso": 4,
    "escenario": {
     "titulo": "Scenario B — Meridian Ops",
-    "texto": "Meridian Ops is moving its repetitive work to unattended automation: overnight jobs, CI pipelines, and scheduled audits, with guardrails that hold when nobody is watching."
+    "texto": "Meridian Ops is moving its repetitive work to unattended automation: overnight jobs, CI pipelines, and scheduled audits, with guardrails that hold when nobody is watching.",
+    "titulo_es": "Escenario B — Meridian Ops",
+    "texto_es": "Meridian Ops está migrando su trabajo repetitivo a automatización desatendida: jobs nocturnos, pipelines de CI y auditorías programadas, con guardrails que aguanten cuando nadie está mirando."
    },
    "stem": "An auto-mode run finished with every action approved by the classifier, yet the refactored authentication code is broken. Why didn't the classifier stop it, and what closes the gap?",
    "opciones": [
@@ -651,17 +1051,27 @@
    ],
    "correcta": "B",
    "explicacion": "<b>B.</b> *\"Broken isn't dangerous.\"* El clasificador vigila escaladas de intención ANTES de cada acción; la corrección la garantiza el <b>Stop hook</b> DESPUÉS. Uno intención, otro corrección — el par de las lecciones 4+5.",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "Una corrida en auto mode terminó con cada acción aprobada por el clasificador, pero el código de autenticación refactorizado está roto. ¿Por qué no lo detuvo el clasificador, y qué cierra el hueco?",
+   "opciones_es": [
+    "El clasificador estaba mal configurado; reinstala Claude Code",
+    "El clasificador guarda intención, no corrección — acompaña auto mode con un Stop hook que corra los tests",
+    "Auto mode desactiva toda revisión de seguridad; usa bypass",
+    "El clasificador solo revisa comandos bash, no ediciones de código"
+   ]
   },
   {
    "id": "sim02-q10",
    "origen": "simulacro-02",
    "tema": "hooks-permisos",
    "subtema": "Permission modes",
+   "sub": "c4-permisos",
    "curso": 4,
    "escenario": {
     "titulo": "Scenario B — Meridian Ops",
-    "texto": "Meridian Ops is moving its repetitive work to unattended automation: overnight jobs, CI pipelines, and scheduled audits, with guardrails that hold when nobody is watching."
+    "texto": "Meridian Ops is moving its repetitive work to unattended automation: overnight jobs, CI pipelines, and scheduled audits, with guardrails that hold when nobody is watching.",
+    "titulo_es": "Escenario B — Meridian Ops",
+    "texto_es": "Meridian Ops está migrando su trabajo repetitivo a automatización desatendida: jobs nocturnos, pipelines de CI y auditorías programadas, con guardrails que aguanten cuando nadie está mirando."
    },
    "stem": "When is \"bypass permissions\" an acceptable choice, per the course?",
    "opciones": [
@@ -672,17 +1082,27 @@
    ],
    "correcta": "A",
    "explicacion": "<b>A.</b> Bypass = cero checks (equivalente a dangerously-skip-permissions). Solo en un entorno aislado y desechable: contenedor o VM.",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "Según el curso, ¿cuándo es aceptable elegir \"bypass permissions\"?",
+   "opciones_es": [
+    "Solo dentro de un contenedor o máquina virtual aislada",
+    "Siempre que confíes plenamente en el prompt que escribiste",
+    "En cualquier runner de CI, porque CI ya está automatizado",
+    "Nunca — el flag existe solo para pruebas internas de Anthropic"
+   ]
   },
   {
    "id": "sim02-q11",
    "origen": "simulacro-02",
    "tema": "hooks-permisos",
    "subtema": "Hooks",
+   "sub": "c4-hooks",
    "curso": 4,
    "escenario": {
     "titulo": "Scenario B — Meridian Ops",
-    "texto": "Meridian Ops is moving its repetitive work to unattended automation: overnight jobs, CI pipelines, and scheduled audits, with guardrails that hold when nobody is watching."
+    "texto": "Meridian Ops is moving its repetitive work to unattended automation: overnight jobs, CI pipelines, and scheduled audits, with guardrails that hold when nobody is watching.",
+    "titulo_es": "Escenario B — Meridian Ops",
+    "texto_es": "Meridian Ops está migrando su trabajo repetitivo a automatización desatendida: jobs nocturnos, pipelines de CI y auditorías programadas, con guardrails que aguanten cuando nadie está mirando."
    },
    "stem": "A PreToolUse hook detects a dangerous command and exits with code 1 to stop it. What actually happens?",
    "opciones": [
@@ -693,17 +1113,27 @@
    ],
    "correcta": "C",
    "explicacion": "<b>C.</b> 🪤 LA trampa de exit codes: <b>1 no bloquea</b> (se loguea y Claude sigue). Bloquear = <b>exit 2</b>, cuyo stderr sí se alimenta a Claude como contexto.",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "Un hook PreToolUse detecta un comando peligroso y sale con código 1 para detenerlo. ¿Qué pasa en realidad?",
+   "opciones_es": [
+    "El comando se bloquea y el stderr le llega a Claude",
+    "Claude Code truena con un error de hook",
+    "No se bloquea nada — el comando corre de todas formas; bloquear requiere exit code 2",
+    "El usuario recibe un prompt de aprobación"
+   ]
   },
   {
    "id": "sim02-q12",
    "origen": "simulacro-02",
    "tema": "hooks-permisos",
    "subtema": "Hooks",
+   "sub": "c4-hooks",
    "curso": 4,
    "escenario": {
     "titulo": "Scenario B — Meridian Ops",
-    "texto": "Meridian Ops is moving its repetitive work to unattended automation: overnight jobs, CI pipelines, and scheduled audits, with guardrails that hold when nobody is watching."
+    "texto": "Meridian Ops is moving its repetitive work to unattended automation: overnight jobs, CI pipelines, and scheduled audits, with guardrails that hold when nobody is watching.",
+    "titulo_es": "Escenario B — Meridian Ops",
+    "texto_es": "Meridian Ops está migrando su trabajo repetitivo a automatización desatendida: jobs nocturnos, pipelines de CI y auditorías programadas, con guardrails que aguanten cuando nadie está mirando."
    },
    "stem": "After long conversations get compacted, Claude \"starts cold\" and forgets which files were in play. Which hook setup re-injects a working-state summary into the conversation?",
    "opciones": [
@@ -714,17 +1144,27 @@
    ],
    "correcta": "D",
    "explicacion": "<b>D.</b> El trip-up oficial del curso: PostCompact NO devuelve su output a la conversación; <b>SessionStart con matcher compact</b> sí. (Texto plano en exit 0 entra al contexto en SessionStart/UserPromptSubmit/UserPromptExpansion.)",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "Después de compactar conversaciones largas, Claude \"arranca frío\" y olvida qué archivos estaban en juego. ¿Qué configuración de hook re-inyecta un resumen del estado a la conversación?",
+   "opciones_es": [
+    "Un hook PostCompact que imprima el resumen",
+    "Un hook PreCompact que guarde el resumen en un archivo",
+    "Un Stop hook con exit code 2",
+    "Un hook SessionStart con el matcher compact — su output regresa al contexto"
+   ]
   },
   {
    "id": "sim02-q13",
    "origen": "simulacro-02",
    "tema": "hooks-permisos",
    "subtema": "Hooks",
+   "sub": "c4-hooks",
    "curso": 4,
    "escenario": {
     "titulo": "Scenario B — Meridian Ops",
-    "texto": "Meridian Ops is moving its repetitive work to unattended automation: overnight jobs, CI pipelines, and scheduled audits, with guardrails that hold when nobody is watching."
+    "texto": "Meridian Ops is moving its repetitive work to unattended automation: overnight jobs, CI pipelines, and scheduled audits, with guardrails that hold when nobody is watching.",
+    "titulo_es": "Escenario B — Meridian Ops",
+    "texto_es": "Meridian Ops está migrando su trabajo repetitivo a automatización desatendida: jobs nocturnos, pipelines de CI y auditorías programadas, con guardrails que aguanten cuando nadie está mirando."
    },
    "stem": "A command Claude wants to run contains a live secret (<code>sk_live_...</code>). The work itself is legitimate. What's the most elegant PreToolUse response?",
    "opciones": [
@@ -735,17 +1175,27 @@
    ],
    "correcta": "B",
    "explicacion": "<b>B.</b> Redactar en vez de bloquear: <code>updatedInput</code> reescribe la llamada. Catch: reemplaza el input COMPLETO — devuelve también los campos que no cambias. *\"The work still got done. But the secret never made it through.\"*",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "Un comando que Claude quiere correr contiene un secreto en vivo (<code>sk_live_...</code>). El trabajo en sí es legítimo. ¿Cuál es la respuesta PreToolUse más elegante?",
+   "opciones_es": [
+    "permissionDecision \"deny\" — rechazar el comando completo",
+    "Devolver updatedInput con el secreto reemplazado por un placeholder — el comando corre igual, el secreto nunca pasa (devolviendo también los campos sin cambios)",
+    "permissionDecision \"ask\" para que el usuario apruebe el secreto",
+    "Exit code 1 con una advertencia en stderr"
+   ]
   },
   {
    "id": "sim02-q14",
    "origen": "simulacro-02",
    "tema": "automatizacion",
    "subtema": "Automatización",
+   "sub": "c4-auto",
    "curso": 4,
    "escenario": {
     "titulo": "Scenario B — Meridian Ops",
-    "texto": "Meridian Ops is moving its repetitive work to unattended automation: overnight jobs, CI pipelines, and scheduled audits, with guardrails that hold when nobody is watching."
+    "texto": "Meridian Ops is moving its repetitive work to unattended automation: overnight jobs, CI pipelines, and scheduled audits, with guardrails that hold when nobody is watching.",
+    "titulo_es": "Escenario B — Meridian Ops",
+    "texto_es": "Meridian Ops está migrando su trabajo repetitivo a automatización desatendida: jobs nocturnos, pipelines de CI y auditorías programadas, con guardrails que aguanten cuando nadie está mirando."
    },
    "stem": "Meridian wants a routine that runs every 15 minutes and pushes straight to main. What's wrong with this plan?",
    "opciones": [
@@ -756,17 +1206,27 @@
    ],
    "correcta": "A",
    "explicacion": "<b>A.</b> Dos de los 3 límites de routines: recurrencia <b>máximo cada hora</b>, y clone fresco que solo pushea a ramas <b>claude/</b> — el guardrail anti-\"reescribir main\". (El tercero: es research preview.) Y no: corren en infra de Anthropic, sin servidor tuyo.",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "Meridian quiere una routine que corra cada 15 minutos y pushee directo a main. ¿Qué está mal con este plan?",
+   "opciones_es": [
+    "Las routines recurrentes corren máximo cada hora, y solo pueden pushear a ramas con prefijo claude/ salvo que lo relajes por repo",
+    "Nada — las routines soportan cualquier intervalo y cualquier rama",
+    "Las routines no se pueden programar; solo responden a eventos de GitHub",
+    "Las routines requieren hostear tu propio servidor para triggers de cron"
+   ]
   },
   {
    "id": "sim02-q15",
    "origen": "simulacro-02",
    "tema": "automatizacion",
    "subtema": "Automatización",
+   "sub": "c4-auto",
    "curso": 4,
    "escenario": {
     "titulo": "Scenario B — Meridian Ops",
-    "texto": "Meridian Ops is moving its repetitive work to unattended automation: overnight jobs, CI pipelines, and scheduled audits, with guardrails that hold when nobody is watching."
+    "texto": "Meridian Ops is moving its repetitive work to unattended automation: overnight jobs, CI pipelines, and scheduled audits, with guardrails that hold when nobody is watching.",
+    "titulo_es": "Escenario B — Meridian Ops",
+    "texto_es": "Meridian Ops está migrando su trabajo repetitivo a automatización desatendida: jobs nocturnos, pipelines de CI y auditorías programadas, con guardrails que aguanten cuando nadie está mirando."
    },
    "stem": "A CI script needs the fastest possible startup and must NOT load the repo's hooks, skills, MCP servers, or CLAUDE.md. Per the official docs, which invocation is correct?",
    "opciones": [
@@ -777,17 +1237,27 @@
    ],
    "correcta": "C",
    "explicacion": "<b>C.</b> Verificado contra docs oficiales: <b>--bare</b> se salta la auto-discovery (hooks, skills, plugins, MCP, auto memory, CLAUDE.md); <code>-p</code> a secas SÍ carga el entorno local. (La página del curso tiene este dato mal; el video bien.)",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "Un script de CI necesita el arranque más rápido posible y NO debe cargar los hooks, skills, MCP servers ni CLAUDE.md del repo. Según los docs oficiales, ¿cuál invocación es correcta?",
+   "opciones_es": [
+    "<code>claude -p \"...\"</code> — el flag -p ya se salta toda la auto-discovery",
+    "<code>claude --headless \"...\"</code>",
+    "<code>claude --bare -p \"...\"</code> — --bare es el que salta la auto-discovery",
+    "<code>claude --no-context -p \"...\"</code>"
+   ]
   },
   {
    "id": "sim02-q16",
    "origen": "simulacro-02",
    "tema": "automatizacion",
    "subtema": "Automatización",
+   "sub": "c4-auto",
    "curso": 4,
    "escenario": {
     "titulo": "Scenario B — Meridian Ops",
-    "texto": "Meridian Ops is moving its repetitive work to unattended automation: overnight jobs, CI pipelines, and scheduled audits, with guardrails that hold when nobody is watching."
+    "texto": "Meridian Ops is moving its repetitive work to unattended automation: overnight jobs, CI pipelines, and scheduled audits, with guardrails that hold when nobody is watching.",
+    "titulo_es": "Escenario B — Meridian Ops",
+    "texto_es": "Meridian Ops está migrando su trabajo repetitivo a automatización desatendida: jobs nocturnos, pipelines de CI y auditorías programadas, con guardrails que aguanten cuando nadie está mirando."
    },
    "stem": "A pipeline needs Claude to emit a machine-readable list of endpoints matching a schema, to pipe into a database. Which setup, and where does the data land?",
    "opciones": [
@@ -798,17 +1268,27 @@
    ],
    "correcta": "B",
    "explicacion": "<b>B.</b> El schema RESTRINGE la salida (no es una súplica en el prompt) y el objeto cae en <b><code>structured_output</code></b> → <code>jq '.structured_output.endpoints'</code> → a la base de datos.",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "Un pipeline necesita que Claude emita una lista procesable de endpoints que cumpla un schema, para meterla a una base de datos. ¿Qué setup, y en qué campo cae la data?",
+   "opciones_es": [
+    "Pedir JSON en el prompt y parsear lo que salga",
+    "<code>--output-format json --json-schema '...'</code> — el objeto que cumple el schema cae en el campo structured_output",
+    "<code>--format=xml</code> con una hoja de estilos",
+    "Redirigir stdout a un .json; Claude detecta la extensión"
+   ]
   },
   {
    "id": "sim02-q17",
    "origen": "simulacro-02",
    "tema": "automatizacion",
    "subtema": "GitHub Actions",
+   "sub": "c4-actions",
    "curso": 4,
    "escenario": {
     "titulo": "Scenario C — Atlas Team",
-    "texto": "Atlas Team is rolling Claude into its GitHub workflow — managed code review, a custom action, and shared plugins — while keeping unsupervised results trustworthy."
+    "texto": "Atlas Team is rolling Claude into its GitHub workflow — managed code review, a custom action, and shared plugins — while keeping unsupervised results trustworthy.",
+    "titulo_es": "Escenario C — Atlas Team",
+    "texto_es": "Atlas Team está integrando Claude a su flujo de GitHub — code review administrado, un action personalizado y plugins compartidos — manteniendo confiables los resultados no supervisados."
    },
    "stem": "Atlas wants managed Code Review to auto-fix findings and block any PR with critical issues from merging. What's the reality of the managed service?",
    "opciones": [
@@ -819,17 +1299,27 @@
    ],
    "correcta": "D",
    "explicacion": "<b>D.</b> Las fronteras del servicio: <b>nunca aprueba/bloquea</b> (el juicio es humano) y <b>no hay autofix administrado</b> — el fix es local: <code>/code-review --fix</code>. \"Claude flags things; you decide.\"",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "Atlas quiere que el Code Review administrado auto-arregle los findings y bloquee el merge de cualquier PR con issues críticos. ¿Cuál es la realidad del servicio?",
+   "opciones_es": [
+    "Ambas cosas se soportan — se habilitan en admin settings",
+    "Puede bloquear PRs pero no arreglarlos",
+    "Puede arreglar pero nunca bloquear",
+    "Ninguna — nunca aprueba ni bloquea, y no hay autofix administrado; los findings se aplican localmente con /code-review --fix"
+   ]
   },
   {
    "id": "sim02-q18",
    "origen": "simulacro-02",
    "tema": "automatizacion",
    "subtema": "GitHub Actions",
+   "sub": "c4-actions",
    "curso": 4,
    "escenario": {
     "titulo": "Scenario C — Atlas Team",
-    "texto": "Atlas Team is rolling Claude into its GitHub workflow — managed code review, a custom action, and shared plugins — while keeping unsupervised results trustworthy."
+    "texto": "Atlas Team is rolling Claude into its GitHub workflow — managed code review, a custom action, and shared plugins — while keeping unsupervised results trustworthy.",
+    "titulo_es": "Escenario C — Atlas Team",
+    "texto_es": "Atlas Team está integrando Claude a su flujo de GitHub — code review administrado, un action personalizado y plugins compartidos — manteniendo confiables los resultados no supervisados."
    },
    "stem": "Atlas runs the claude-code-action on AWS Bedrock (<code>use_bedrock: true</code>). Does the workflow need the anthropic_api_key input?",
    "opciones": [
@@ -840,17 +1330,27 @@
    ],
    "correcta": "A",
    "explicacion": "<b>A.</b> Verificado en docs oficiales: la key es <b>condicional</b> — requerida con la Claude API directa; no se usa con Bedrock/Vertex/Foundry/OAuth token/WIF (autentican vía OIDC). D exagera: con la API directa sí se necesita.",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "Atlas corre el claude-code-action sobre AWS Bedrock (<code>use_bedrock: true</code>). ¿El workflow necesita el input anthropic_api_key?",
+   "opciones_es": [
+    "No — la key solo se requiere con la Claude API directa; Bedrock/Vertex autentican vía OIDC y no la usan",
+    "Sí — el action siempre la requiere",
+    "Sí, pero puede ser cualquier valor de relleno",
+    "No — el action nunca usa API keys bajo ninguna configuración"
+   ]
   },
   {
    "id": "sim02-q19",
    "origen": "simulacro-02",
    "tema": "claude-code",
    "subtema": "Verificación",
+   "sub": "c4-trust",
    "curso": 4,
    "escenario": {
     "titulo": "Scenario C — Atlas Team",
-    "texto": "Atlas Team is rolling Claude into its GitHub workflow — managed code review, a custom action, and shared plugins — while keeping unsupervised results trustworthy."
+    "texto": "Atlas Team is rolling Claude into its GitHub workflow — managed code review, a custom action, and shared plugins — while keeping unsupervised results trustworthy.",
+    "titulo_es": "Escenario C — Atlas Team",
+    "texto_es": "Atlas Team está integrando Claude a su flujo de GitHub — code review administrado, un action personalizado y plugins compartidos — manteniendo confiables los resultados no supervisados."
    },
    "stem": "An overnight unsupervised run ends with a beautifully written summary of the work. Per the course, what's your FIRST verification move?",
    "opciones": [
@@ -861,17 +1361,27 @@
    ],
    "correcta": "C",
    "explicacion": "<b>C.</b> *\"Start with the diff, not the summary\"* — la trampa es el resumen impecable mientras el diff tocó archivos inesperados. *\"A clean write-up is not proof of clean code.\"* Y preguntarle a la misma sesión (B) es lo opuesto de la cold second opinion.",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "Una corrida desatendida termina de noche con un resumen bellamente escrito del trabajo. Según el curso, ¿cuál es tu PRIMER movimiento de verificación?",
+   "opciones_es": [
+    "Leer el resumen con cuidado y aprobar si es coherente",
+    "Preguntarle a la misma sesión si confía en su trabajo",
+    "Empezar por el diff: correr /code-review y luego poner tus propios ojos en git diff — buscando archivos fuera del plan",
+    "Volver a correr todo el job y comparar resúmenes"
+   ]
   },
   {
    "id": "sim02-q20",
    "origen": "simulacro-02",
    "tema": "claude-code",
    "subtema": "Plugins",
+   "sub": "c4-plugins",
    "curso": 4,
    "escenario": {
     "titulo": "Scenario C — Atlas Team",
-    "texto": "Atlas Team is rolling Claude into its GitHub workflow — managed code review, a custom action, and shared plugins — while keeping unsupervised results trustworthy."
+    "texto": "Atlas Team is rolling Claude into its GitHub workflow — managed code review, a custom action, and shared plugins — while keeping unsupervised results trustworthy.",
+    "titulo_es": "Escenario C — Atlas Team",
+    "texto_es": "Atlas Team está integrando Claude a su flujo de GitHub — code review administrado, un action personalizado y plugins compartidos — manteniendo confiables los resultados no supervisados."
    },
    "stem": "Atlas installs a community plugin just for its excellent skills. Regarding the plugin's PreToolUse and Stop hooks, what's true?",
    "opciones": [
@@ -882,17 +1392,27 @@
    ],
    "correcta": "B",
    "explicacion": "<b>B.</b> Un plugin corre código <b>con tus privilegios</b>: te llevas sus hooks los leas o no, y los hooks se <b>APILAN</b> (ninguno reemplaza al otro). Por eso: *\"read before you install\"* — y \"reviewed isn't the same as trusted\".",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "Atlas instala un plugin comunitario solo por sus excelentes skills. Sobre los hooks PreToolUse y Stop del plugin, ¿qué es cierto?",
+   "opciones_es": [
+    "Quedan desactivados salvo que se habiliten explícitamente en settings.json",
+    "También corren — apilándose junto a los hooks propios de Atlas en cada evento que haga match — por eso se lee un plugin antes de instalarlo",
+    "Reemplazan a los hooks propios de Atlas para los mismos eventos",
+    "Los plugins no pueden contener hooks, solo skills y agentes"
+   ]
   },
   {
    "id": "sim03-q01",
    "origen": "simulacro-03",
    "tema": "skills",
    "subtema": "Skills (curso 1)",
+   "sub": "c1-fundamentos",
    "curso": 0,
    "escenario": {
     "titulo": "Scenario A — Nimbus Digital",
-    "texto": "Nimbus Digital, a 20-developer agency, standardized on skills months ago and is now auditing its setup: skill quality, priority conflicts, subagent wiring, and the problems developers keep reporting."
+    "texto": "Nimbus Digital, a 20-developer agency, standardized on skills months ago and is now auditing its setup: skill quality, priority conflicts, subagent wiring, and the problems developers keep reporting.",
+    "titulo_es": "Escenario A — Nimbus Digital",
+    "texto_es": "Nimbus Digital, una agencia de 20 desarrolladores, se estandarizó en skills hace meses y ahora audita su setup: calidad de las skills, conflictos de prioridad, cableado de subagents y los problemas que los devs siguen reportando."
    },
    "stem": "A junior dev drafts a SKILL.md. Which set of frontmatter facts is correct?",
    "opciones": [
@@ -903,17 +1423,27 @@
    ],
    "correcta": "B",
    "explicacion": "<b>B.</b> El set completo son 4 campos: <b>name</b> (64, minúsculas/números/guiones, = carpeta) y <b>description</b> (1,024, criterio de matching) obligatorios; <b>allowed-tools</b> y <b>model</b> opcionales. Version/author son del manifest de PLUGINS, no de skills.",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "Un dev junior redacta un SKILL.md. ¿Qué conjunto de datos del frontmatter es correcto?",
+   "opciones_es": [
+    "name, description y allowed-tools son obligatorios; model es opcional",
+    "Solo name (máx 64 chars, debe coincidir con la carpeta) y description (máx 1,024 chars) son obligatorios; allowed-tools y model son opcionales",
+    "Solo description es obligatoria; name se infiere de la carpeta",
+    "name, description, version y author son obligatorios"
+   ]
   },
   {
    "id": "sim03-q02",
    "origen": "simulacro-03",
    "tema": "skills",
    "subtema": "Skills (curso 1)",
+   "sub": "c1-fundamentos",
    "curso": 0,
    "escenario": {
     "titulo": "Scenario A — Nimbus Digital",
-    "texto": "Nimbus Digital, a 20-developer agency, standardized on skills months ago and is now auditing its setup: skill quality, priority conflicts, subagent wiring, and the problems developers keep reporting."
+    "texto": "Nimbus Digital, a 20-developer agency, standardized on skills months ago and is now auditing its setup: skill quality, priority conflicts, subagent wiring, and the problems developers keep reporting.",
+    "titulo_es": "Escenario A — Nimbus Digital",
+    "texto_es": "Nimbus Digital, una agencia de 20 desarrolladores, se estandarizó en skills hace meses y ahora audita su setup: calidad de las skills, conflictos de prioridad, cableado de subagents y los problemas que los devs siguen reportando."
    },
    "stem": "A dev keeps a personal <code>deploy-check</code> skill. The repo ships a project <code>deploy-check</code>, and an installed plugin brings a third one. Which skill activates when they ask for a deploy check in that repo?",
    "opciones": [
@@ -924,17 +1454,27 @@
    ],
    "correcta": "D",
    "explicacion": "<b>D.</b> E-P-P-P: con nombre repetido, <b>Personal gana a Project y a Plugins</b> (solo Enterprise le gana). Y recuerda el contraste: esto es de SKILLS — los CLAUDE.md no compiten, se apilan.",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "Un dev mantiene una skill personal <code>deploy-check</code>. El repo trae una <code>deploy-check</code> de proyecto, y un plugin instalado trae una tercera. ¿Cuál se activa cuando pide un deploy check en ese repo?",
+   "opciones_es": [
+    "La del proyecto — el contexto del repo gana",
+    "La del plugin — gana la instalada más recientemente",
+    "Las tres fusionan sus instrucciones",
+    "La personal — la prioridad es Enterprise → Personal → Project → Plugins"
+   ]
   },
   {
    "id": "sim03-q03",
    "origen": "simulacro-03",
    "tema": "troubleshooting",
    "subtema": "Troubleshooting skills",
+   "sub": "c1-ts",
    "curso": 0,
    "escenario": {
     "titulo": "Scenario A — Nimbus Digital",
-    "texto": "Nimbus Digital, a 20-developer agency, standardized on skills months ago and is now auditing its setup: skill quality, priority conflicts, subagent wiring, and the problems developers keep reporting."
+    "texto": "Nimbus Digital, a 20-developer agency, standardized on skills months ago and is now auditing its setup: skill quality, priority conflicts, subagent wiring, and the problems developers keep reporting.",
+    "titulo_es": "Escenario A — Nimbus Digital",
+    "texto_es": "Nimbus Digital, una agencia de 20 desarrolladores, se estandarizó en skills hace meses y ahora audita su setup: calidad de las skills, conflictos de prioridad, cableado de subagents y los problemas que los devs siguen reportando."
    },
    "stem": "The team's <code>api-docs</code> skill passes the validator and shows in the skills list, but when devs type \"document this endpoint for me\" it never fires. Its description: \"Generates API documentation.\" Per the course, the fix is:",
    "opciones": [
@@ -945,17 +1485,27 @@
    ],
    "correcta": "A",
    "explicacion": "<b>A.</b> \"No se dispara\" → *\"the cause is almost always the description\"*: falta overlap semántico con las frases reales. Se arregla en la description, no en prioridad ni tools.",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "La skill <code>api-docs</code> del equipo pasa el validator y aparece en la lista, pero cuando los devs escriben \"document this endpoint for me\" nunca se dispara. Su description: \"Generates API documentation.\" Según el curso, el arreglo es:",
+   "opciones_es": [
+    "Agregar frases-disparador que coincidan con cómo piden las cosas los devs (\"document this endpoint\", \"write docs for this route\") y probar variaciones",
+    "Mover la skill a nivel enterprise para que siempre gane",
+    "Agregar allowed-tools para que la skill pueda escribir archivos",
+    "Acortar el SKILL.md por debajo de 500 líneas"
+   ]
   },
   {
    "id": "sim03-q04",
    "origen": "simulacro-03",
    "tema": "troubleshooting",
    "subtema": "Troubleshooting skills",
+   "sub": "c1-ts",
    "curso": 0,
    "escenario": {
     "titulo": "Scenario A — Nimbus Digital",
-    "texto": "Nimbus Digital, a 20-developer agency, standardized on skills months ago and is now auditing its setup: skill quality, priority conflicts, subagent wiring, and the problems developers keep reporting."
+    "texto": "Nimbus Digital, a 20-developer agency, standardized on skills months ago and is now auditing its setup: skill quality, priority conflicts, subagent wiring, and the problems developers keep reporting.",
+    "titulo_es": "Escenario A — Nimbus Digital",
+    "texto_es": "Nimbus Digital, una agencia de 20 desarrolladores, se estandarizó en skills hace meses y ahora audita su setup: calidad de las skills, conflictos de prioridad, cableado de subagents y los problemas que los devs siguen reportando."
    },
    "stem": "A skill saved as <code>~/.claude/skills/skill.md</code> never appears in the available list. How many structural errors are there, and what are they?",
    "opciones": [
@@ -966,17 +1516,27 @@
    ],
    "correcta": "C",
    "explicacion": "<b>C.</b> Requisitos estructurales de la lección 6 del curso 1: dentro de un <b>directorio con nombre</b> (no suelto en la raíz de skills/) y nombre exacto <b>SKILL.md</b>. Diagnóstico rápido: <code>claude --debug</code>.",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "Una skill guardada como <code>~/.claude/skills/skill.md</code> nunca aparece en la lista. ¿Cuántos errores estructurales hay, y cuáles son?",
+   "opciones_es": [
+    "Uno — necesita frontmatter con un campo version",
+    "Uno — el archivo debería llamarse skill.yaml",
+    "Dos — el archivo debe vivir dentro de un directorio con nombre, y llamarse exactamente SKILL.md (SKILL en mayúsculas, md en minúsculas)",
+    "Ninguno — solo falta reiniciar Claude Code"
+   ]
   },
   {
    "id": "sim03-q05",
    "origen": "simulacro-03",
    "tema": "troubleshooting",
    "subtema": "Troubleshooting skills",
+   "sub": "c1-ts",
    "curso": 0,
    "escenario": {
     "titulo": "Scenario A — Nimbus Digital",
-    "texto": "Nimbus Digital, a 20-developer agency, standardized on skills months ago and is now auditing its setup: skill quality, priority conflicts, subagent wiring, and the problems developers keep reporting."
+    "texto": "Nimbus Digital, a 20-developer agency, standardized on skills months ago and is now auditing its setup: skill quality, priority conflicts, subagent wiring, and the problems developers keep reporting.",
+    "titulo_es": "Escenario A — Nimbus Digital",
+    "texto_es": "Nimbus Digital, una agencia de 20 desarrolladores, se estandarizó en skills hace meses y ahora audita su setup: calidad de las skills, conflictos de prioridad, cableado de subagents y los problemas que los devs siguen reportando."
    },
    "stem": "After IT rolls out enterprise skills, a dev's personal <code>security-review</code> skill silently stops being used. What happened, and what's the recommended path?",
    "opciones": [
@@ -987,17 +1547,27 @@
    ],
    "correcta": "B",
    "explicacion": "<b>B.</b> *Shadowing*: enterprise gana todo conflicto de nombre. Opciones: renombrar (fácil) o hablar con el admin — *\"you'll have a better chance with number one\"*. C es falso: solo pisa las del MISMO nombre.",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "Después de que IT despliega skills enterprise, la skill personal <code>security-review</code> de un dev deja de usarse en silencio. ¿Qué pasó, y cuál es el camino recomendado?",
+   "opciones_es": [
+    "El caché de la skill quedó viejo — limpiar caché y reinstalar",
+    "Una skill enterprise con el mismo nombre ahora la tapa — renombrar la personal a algo distinto (el camino fácil)",
+    "Los despliegues enterprise desactivan todas las skills personales permanentemente",
+    "El validator debe re-correrse tras cualquier cambio enterprise"
+   ]
   },
   {
    "id": "sim03-q06",
    "origen": "simulacro-03",
    "tema": "subagents",
    "subtema": "Subagents",
+   "sub": "c1-subagents",
    "curso": 0,
    "escenario": {
     "titulo": "Scenario A — Nimbus Digital",
-    "texto": "Nimbus Digital, a 20-developer agency, standardized on skills months ago and is now auditing its setup: skill quality, priority conflicts, subagent wiring, and the problems developers keep reporting."
+    "texto": "Nimbus Digital, a 20-developer agency, standardized on skills months ago and is now auditing its setup: skill quality, priority conflicts, subagent wiring, and the problems developers keep reporting.",
+    "titulo_es": "Escenario A — Nimbus Digital",
+    "texto_es": "Nimbus Digital, una agencia de 20 desarrolladores, se estandarizó en skills hace meses y ahora audita su setup: calidad de las skills, conflictos de prioridad, cableado de subagents y los problemas que los devs siguen reportando."
    },
    "stem": "Nimbus wants delegated code reviews to always apply its <code>frontend-standards</code> skill. Which setup works?",
    "opciones": [
@@ -1008,17 +1578,27 @@
    ],
    "correcta": "D",
    "explicacion": "<b>D.</b> Los subagents nacen en blanco — <b>no heredan skills</b>; solo los <b>custom</b> pueden usarlas, listándolas en <code>skills:</code>. Los built-in (Explore, Plan, Verify) no pueden usarlas JAMÁS.",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "Nimbus quiere que las revisiones delegadas siempre apliquen su skill <code>frontend-standards</code>. ¿Qué setup funciona?",
+   "opciones_es": [
+    "Delegar al agente built-in Explore — hereda las skills de la sesión",
+    "Cualquier subagent toma las skills automáticamente cuando la tarea hace match con sus descriptions",
+    "Agregar la skill a CLAUDE.md para que todos los agentes la vean",
+    "Crear un subagent personalizado en .claude/agents con skills: frontend-standards en su frontmatter (y el tool Skill disponible)"
+   ]
   },
   {
    "id": "sim03-q07",
    "origen": "simulacro-03",
    "tema": "subagents",
    "subtema": "Subagents",
+   "sub": "c1-subagents",
    "curso": 0,
    "escenario": {
     "titulo": "Scenario A — Nimbus Digital",
-    "texto": "Nimbus Digital, a 20-developer agency, standardized on skills months ago and is now auditing its setup: skill quality, priority conflicts, subagent wiring, and the problems developers keep reporting."
+    "texto": "Nimbus Digital, a 20-developer agency, standardized on skills months ago and is now auditing its setup: skill quality, priority conflicts, subagent wiring, and the problems developers keep reporting.",
+    "titulo_es": "Escenario A — Nimbus Digital",
+    "texto_es": "Nimbus Digital, una agencia de 20 desarrolladores, se estandarizó en skills hace meses y ahora audita su setup: calidad de las skills, conflictos de prioridad, cableado de subagents y los problemas que los devs siguen reportando."
    },
    "stem": "A dev lists six skills in a custom subagent's <code>skills:</code> field \"just in case.\" What's the actual cost, per the course?",
    "opciones": [
@@ -1029,17 +1609,27 @@
    ],
    "correcta": "A",
    "explicacion": "<b>A.</b> En subagents las skills cargan <b>al arrancar, completas, sin matching ni confirmación</b>. Regla: *\"only list skills that are always relevant to the subagent's purpose.\"*",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "Un dev lista seis skills en el campo skills: de un subagent \"por si acaso\". ¿Cuál es el costo real, según el curso?",
+   "opciones_es": [
+    "Las seis cargan completas al arrancar el subagent — ahí no hay matching on-demand — así que cada delegación las paga todas; lista solo las siempre-relevantes",
+    "Ninguno — las skills cargan on demand dentro de subagents igual que en la conversación principal",
+    "Solo cargan las primeras tres; el resto se ignora",
+    "El subagent pide confirmación antes de cargar cada una"
+   ]
   },
   {
    "id": "sim03-q08",
    "origen": "simulacro-03",
    "tema": "claude-code",
    "subtema": "CLAUDE.md",
+   "sub": "c4-claudemd",
    "curso": 0,
    "escenario": {
     "titulo": "Scenario B — Vector Freight",
-    "texto": "Vector Freight is hardening its Claude Code configuration: getting rules into the right surface, wiring guardrail hooks, and setting permission levels for a mixed team."
+    "texto": "Vector Freight is hardening its Claude Code configuration: getting rules into the right surface, wiring guardrail hooks, and setting permission levels for a mixed team.",
+    "titulo_es": "Escenario B — Vector Freight",
+    "texto_es": "Vector Freight está endureciendo su configuración de Claude Code: poniendo cada regla en la superficie correcta, cableando hooks de guardrail y fijando niveles de permisos para un equipo mixto."
    },
    "stem": "A developer expects their User-level CLAUDE.md to \"override\" the Project one the way personal skills beat project skills. What actually happens at launch?",
    "opciones": [
@@ -1050,17 +1640,27 @@
    ],
    "correcta": "C",
    "explicacion": "<b>C.</b> ⭐ El contraste que hay que dominar: skills con nombre repetido → gana UNA (E-P-P-P). CLAUDE.md → <b>todos se apilan</b>, nada se tira. Regla flash #1 de tu registro.",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "Un desarrollador espera que su CLAUDE.md de nivel User \"pise\" al de Project igual que las skills personales le ganan a las de proyecto. ¿Qué pasa en realidad al arrancar?",
+   "opciones_es": [
+    "Exactamente eso — el CLAUDE.md de User gana y el archivo de Project se salta",
+    "Project gana — los archivos del repo le ganan a los personales",
+    "No hay pisado — todos los CLAUDE.md (managed, user, project, local) cargan juntos y se apilan",
+    "Claude Code le pide al usuario elegir uno"
+   ]
   },
   {
    "id": "sim03-q09",
    "origen": "simulacro-03",
    "tema": "contexto",
    "subtema": "Context management",
+   "sub": "c1-pd",
    "curso": 0,
    "escenario": {
     "titulo": "Scenario B — Vector Freight",
-    "texto": "Vector Freight is hardening its Claude Code configuration: getting rules into the right surface, wiring guardrail hooks, and setting permission levels for a mixed team."
+    "texto": "Vector Freight is hardening its Claude Code configuration: getting rules into the right surface, wiring guardrail hooks, and setting permission levels for a mixed team.",
+    "titulo_es": "Escenario B — Vector Freight",
+    "texto_es": "Vector Freight está endureciendo su configuración de Claude Code: poniendo cada regla en la superficie correcta, cableando hooks de guardrail y fijando niveles de permisos para un equipo mixto."
    },
    "stem": "Which mechanism actually DEFERS loading content until it's needed?",
    "opciones": [
@@ -1071,17 +1671,27 @@
    ],
    "correcta": "B",
    "explicacion": "<b>B.</b> Progressive disclosure de skills = carga diferida REAL. Los imports de CLAUDE.md se <b>expanden inline al arrancar</b> — organizan, no adelgazan. (Esta acertaste su gemela en el sim 2 — consolidando.)",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "¿Qué mecanismo realmente DIFIERE la carga de contenido hasta que se necesita?",
+   "opciones_es": [
+    "Los imports de CLAUDE.md (@ruta/archivo) — los archivos importados cargan solo cuando una tarea los necesita",
+    "Los archivos references/ de una skill enlazados con una condición explícita \"only load when...\" — los imports de CLAUDE.md se expanden inline al arrancar",
+    "Ambos difieren por igual — por eso existen los dos",
+    "Ninguno — en Claude Code todo carga al arranque"
+   ]
   },
   {
    "id": "sim03-q10",
    "origen": "simulacro-03",
    "tema": "mecanismos",
    "subtema": "Elección de mecanismo",
+   "sub": "c1-vs",
    "curso": 0,
    "escenario": {
     "titulo": "Scenario B — Vector Freight",
-    "texto": "Vector Freight is hardening its Claude Code configuration: getting rules into the right surface, wiring guardrail hooks, and setting permission levels for a mixed team."
+    "texto": "Vector Freight is hardening its Claude Code configuration: getting rules into the right surface, wiring guardrail hooks, and setting permission levels for a mixed team.",
+    "titulo_es": "Escenario B — Vector Freight",
+    "texto_es": "Vector Freight está endureciendo su configuración de Claude Code: poniendo cada regla en la superficie correcta, cableando hooks de guardrail y fijando niveles de permisos para un equipo mixto."
    },
    "stem": "Vector needs two things: (1) a secret scan that runs before every commit and can never be skipped, and (2) a 14-step release-notes procedure used twice a month. Which pair is correct?",
    "opciones": [
@@ -1092,17 +1702,27 @@
    ],
    "correcta": "D",
    "explicacion": "<b>D.</b> Tu marco: (1) \"never skipped\" = no toleras que falte → <b>hook</b> (código que corre). (2) procedimiento por tarea, a veces → <b>skill</b>. CLAUDE.md con énfasis (A) sigue siendo una petición cortés.",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "Vector necesita dos cosas: (1) un escaneo de secretos que corra antes de cada commit y no pueda saltarse nunca, y (2) un procedimiento de release notes de 14 pasos que se usa dos veces al mes. ¿Qué par es correcto?",
+   "opciones_es": [
+    "Ambos en CLAUDE.md con énfasis IMPORTANT",
+    "(1) una skill, (2) un hook",
+    "Ambos como skills con descriptions fuertes",
+    "(1) un hook PreToolUse, (2) una skill"
+   ]
   },
   {
    "id": "sim03-q11",
    "origen": "simulacro-03",
    "tema": "hooks-permisos",
    "subtema": "Hooks",
+   "sub": "c4-hooks",
    "curso": 0,
    "escenario": {
     "titulo": "Scenario B — Vector Freight",
-    "texto": "Vector Freight is hardening its Claude Code configuration: getting rules into the right surface, wiring guardrail hooks, and setting permission levels for a mixed team."
+    "texto": "Vector Freight is hardening its Claude Code configuration: getting rules into the right surface, wiring guardrail hooks, and setting permission levels for a mixed team.",
+    "titulo_es": "Escenario B — Vector Freight",
+    "texto_es": "Vector Freight está endureciendo su configuración de Claude Code: poniendo cada regla en la superficie correcta, cableando hooks de guardrail y fijando niveles de permisos para un equipo mixto."
    },
    "stem": "Claude is about to run <code>curl -H \"Authorization: Bearer sk_live_abc123\" ...</code>. The task is legitimate; only the secret is the problem. Best PreToolUse response?",
    "opciones": [
@@ -1113,17 +1733,27 @@
    ],
    "correcta": "B",
    "explicacion": "<b>B.</b> Regla flash #4: <b>redactar en vez de bloquear</b> con <code>updatedInput</code> (que reemplaza el input COMPLETO — devuelve lo que no cambias). Exit 1 (C) ni siquiera bloquea; defer (D) es solo para corridas -p no interactivas.",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "Claude está por correr <code>curl -H \"Authorization: Bearer sk_live_abc123\" ...</code>. La tarea es legítima; solo el secreto es el problema. ¿Mejor respuesta PreToolUse?",
+   "opciones_es": [
+    "permissionDecision \"deny\" — ningún comando con secretos corre jamás",
+    "Devolver updatedInput con el secreto cambiado por un placeholder, devolviendo intactos los demás campos — el trabajo avanza, el secreto no",
+    "Exit code 1 con advertencia en stderr",
+    "permissionDecision \"defer\" hasta que la sesión termine"
+   ]
   },
   {
    "id": "sim03-q12",
    "origen": "simulacro-03",
    "tema": "hooks-permisos",
    "subtema": "Hooks",
+   "sub": "c4-hooks",
    "curso": 0,
    "escenario": {
     "titulo": "Scenario B — Vector Freight",
-    "texto": "Vector Freight is hardening its Claude Code configuration: getting rules into the right surface, wiring guardrail hooks, and setting permission levels for a mixed team."
+    "texto": "Vector Freight is hardening its Claude Code configuration: getting rules into the right surface, wiring guardrail hooks, and setting permission levels for a mixed team.",
+    "titulo_es": "Escenario B — Vector Freight",
+    "texto_es": "Vector Freight está endureciendo su configuración de Claude Code: poniendo cada regla en la superficie correcta, cableando hooks de guardrail y fijando niveles de permisos para un equipo mixto."
    },
    "stem": "After every /compact, Claude forgets which three files the refactor centers on. Which hook wiring fixes it?",
    "opciones": [
@@ -1134,17 +1764,27 @@
    ],
    "correcta": "A",
    "explicacion": "<b>A.</b> Regla flash #3: el que devuelve su output a la conversación tras compactar es <b>SessionStart + matcher compact</b> — no PostCompact. (D funcionaría a lo bruto pero pagarías el costo en CADA prompt, no solo tras compactar.)",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "Después de cada /compact, Claude pierde de vista los tres archivos centrales del refactor. ¿Qué cableado de hook lo arregla?",
+   "opciones_es": [
+    "SessionStart con el matcher compact, imprimiendo un resumen breve de archivos — ese output re-entra al contexto",
+    "PostCompact imprimiendo el resumen",
+    "PreCompact escribiendo el resumen a un archivo de log",
+    "UserPromptSubmit re-enviando la lista de archivos en cada prompt"
+   ]
   },
   {
    "id": "sim03-q13",
    "origen": "simulacro-03",
    "tema": "hooks-permisos",
    "subtema": "Hooks",
+   "sub": "c4-hooks",
    "curso": 0,
    "escenario": {
     "titulo": "Scenario B — Vector Freight",
-    "texto": "Vector Freight is hardening its Claude Code configuration: getting rules into the right surface, wiring guardrail hooks, and setting permission levels for a mixed team."
+    "texto": "Vector Freight is hardening its Claude Code configuration: getting rules into the right surface, wiring guardrail hooks, and setting permission levels for a mixed team.",
+    "titulo_es": "Escenario B — Vector Freight",
+    "texto_es": "Vector Freight está endureciendo su configuración de Claude Code: poniendo cada regla en la superficie correcta, cableando hooks de guardrail y fijando niveles de permisos para un equipo mixto."
    },
    "stem": "Vector wants Claude to be unable to declare a task finished while tests fail — with the failure automatically fed back so Claude fixes it. The wiring is:",
    "opciones": [
@@ -1155,17 +1795,27 @@
    ],
    "correcta": "C",
    "explicacion": "<b>C.</b> El gate de la lección 8: <b>Stop hook + exit 2</b> — bloquea el fin del turno y el stderr alimenta a Claude, que arregla sin que pidas. Exit 1 (B) no bloquea nada; CLAUDE.md (A) es una promesa, no un gate.",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "Vector quiere que sea IMPOSIBLE que Claude declare terminada una tarea mientras los tests fallen — y que el fallo se le alimente automáticamente para que lo corrija. El cableado es:",
+   "opciones_es": [
+    "Una regla en CLAUDE.md: \"YOU MUST run tests before finishing\"",
+    "Un hook PostToolUse con exit code 1 cuando fallen los tests",
+    "Un Stop hook que corra los tests y salga con 2 si fallan — el turno no puede terminar y el stderr regresa a Claude",
+    "Un hook SubagentStop en plan mode"
+   ]
   },
   {
    "id": "sim03-q14",
    "origen": "simulacro-03",
    "tema": "hooks-permisos",
    "subtema": "Permission modes",
+   "sub": "c4-permisos",
    "curso": 0,
    "escenario": {
     "titulo": "Scenario B — Vector Freight",
-    "texto": "Vector Freight is hardening its Claude Code configuration: getting rules into the right surface, wiring guardrail hooks, and setting permission levels for a mixed team."
+    "texto": "Vector Freight is hardening its Claude Code configuration: getting rules into the right surface, wiring guardrail hooks, and setting permission levels for a mixed team.",
+    "titulo_es": "Escenario B — Vector Freight",
+    "texto_es": "Vector Freight está endureciendo su configuración de Claude Code: poniendo cada regla en la superficie correcta, cableando hooks de guardrail y fijando niveles de permisos para un equipo mixto."
    },
    "stem": "A senior dev wants to run bypass permissions on their everyday laptop \"because my prompts are careful.\" Per the course:",
    "opciones": [
@@ -1176,17 +1826,27 @@
    ],
    "correcta": "B",
    "explicacion": "<b>B.</b> Regla flash #2: bypass = cero checks → <b>solo entorno aislado y desechable</b>. La confianza en el prompt no es un control de seguridad; en la laptop, auto mode conserva al clasificador.",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "Un dev senior quiere correr bypass permissions en su laptop de diario \"porque mis prompts son cuidadosos\". Según el curso:",
+   "opciones_es": [
+    "Bien — el prompting cuidadoso es la salvaguarda aceptada",
+    "No es aceptable — bypass pertenece solo a un contenedor o VM aislado; en una workstation, auto mode conserva la red de seguridad del clasificador",
+    "Bien, siempre que también active un Stop hook",
+    "Bypass ya no existe en el Claude Code actual"
+   ]
   },
   {
    "id": "sim03-q15",
    "origen": "simulacro-03",
    "tema": "automatizacion",
    "subtema": "Automatización",
+   "sub": "c4-auto",
    "curso": 0,
    "escenario": {
     "titulo": "Scenario C — Quanta Metrics",
-    "texto": "Quanta Metrics is wiring Claude Code into scripts, CI, and GitHub — and needs each run to be fast, structured, and verifiable."
+    "texto": "Quanta Metrics is wiring Claude Code into scripts, CI, and GitHub — and needs each run to be fast, structured, and verifiable.",
+    "titulo_es": "Escenario C — Quanta Metrics",
+    "texto_es": "Quanta Metrics está integrando Claude Code a scripts, CI y GitHub — y necesita que cada corrida sea rápida, estructurada y verificable."
    },
    "stem": "A nightly cron script must start as fast as possible and must NOT pick up the repo's hooks, skills, MCP servers, or CLAUDE.md. Per the official docs, the right invocation is:",
    "opciones": [
@@ -1197,17 +1857,27 @@
    ],
    "correcta": "C",
    "explicacion": "<b>C.</b> Regla flash #5 (verificada en docs): <b>--bare</b> salta la auto-discovery; <code>-p</code> a secas SÍ carga hooks/skills/MCP/CLAUDE.md — incluso en carpetas no confiadas.",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "Un script nocturno de cron debe arrancar lo más rápido posible y NO debe tomar los hooks, skills, MCP servers ni CLAUDE.md del repo. Según los docs verificados, la invocación correcta es:",
+   "opciones_es": [
+    "<code>claude -p \"...\"</code> — el modo print ya se salta el entorno local",
+    "<code>claude --isolated -p \"...\"</code>",
+    "<code>claude --bare -p \"...\"</code> — --bare salta la auto-discovery; -p a secas sí carga el entorno local",
+    "<code>claude -p --no-hooks \"...\"</code>"
+   ]
   },
   {
    "id": "sim03-q16",
    "origen": "simulacro-03",
    "tema": "automatizacion",
    "subtema": "Automatización",
+   "sub": "c4-auto",
    "curso": 0,
    "escenario": {
     "titulo": "Scenario C — Quanta Metrics",
-    "texto": "Quanta Metrics is wiring Claude Code into scripts, CI, and GitHub — and needs each run to be fast, structured, and verifiable."
+    "texto": "Quanta Metrics is wiring Claude Code into scripts, CI, and GitHub — and needs each run to be fast, structured, and verifiable.",
+    "titulo_es": "Escenario C — Quanta Metrics",
+    "texto_es": "Quanta Metrics está integrando Claude Code a scripts, CI y GitHub — y necesita que cada corrida sea rápida, estructurada y verificable."
    },
    "stem": "The pipeline needs Claude's answer as JSON matching a strict schema, extracted with jq. Which is correct?",
    "opciones": [
@@ -1218,17 +1888,27 @@
    ],
    "correcta": "A",
    "explicacion": "<b>A.</b> Regla flash #6: el schema RESTRINGE la salida y el objeto cae en <b><code>structured_output</code></b> → <code>jq '.structured_output....'</code>. La CLI sí puede (D falso); pedirlo en el prompt (B) no garantiza nada.",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "El pipeline necesita la respuesta de Claude como JSON que cumpla un schema estricto, extraíble con jq. ¿Cuál es correcto?",
+   "opciones_es": [
+    "Pasar <code>--output-format json --json-schema '...'</code>; el objeto que cumple el schema cae en el campo structured_output de la respuesta",
+    "Pedir JSON en el prompt; parsear lo que Claude escriba",
+    "Pasar <code>--schema</code> y leer el campo answer",
+    "El output estructurado requiere el Agent SDK; la CLI no puede"
+   ]
   },
   {
    "id": "sim03-q17",
    "origen": "simulacro-03",
    "tema": "automatizacion",
    "subtema": "Automatización",
+   "sub": "c4-auto",
    "curso": 0,
    "escenario": {
     "titulo": "Scenario C — Quanta Metrics",
-    "texto": "Quanta Metrics is wiring Claude Code into scripts, CI, and GitHub — and needs each run to be fast, structured, and verifiable."
+    "texto": "Quanta Metrics is wiring Claude Code into scripts, CI, and GitHub — and needs each run to be fast, structured, and verifiable.",
+    "titulo_es": "Escenario C — Quanta Metrics",
+    "texto_es": "Quanta Metrics está integrando Claude Code a scripts, CI y GitHub — y necesita que cada corrida sea rápida, estructurada y verificable."
    },
    "stem": "Script A runs Claude to produce a migration plan. Hours later, script B must execute that plan with full context of what A discussed. What connects them?",
    "opciones": [
@@ -1239,17 +1919,27 @@
    ],
    "correcta": "B",
    "explicacion": "<b>B.</b> Multi-paso headless: capturar <b><code>session_id</code></b> del JSON y retomar con <code>claude --resume</code> — *\"one script kicks off the work, another resumes it later with full context.\"*",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "El script A corre Claude para producir un plan de migración. Horas después, el script B debe ejecutar ese plan con contexto completo de lo que A discutió. ¿Qué los conecta?",
+   "opciones_es": [
+    "El script B pega el transcript completo de A en su prompt",
+    "El script A captura el session_id de su salida JSON; el script B corre claude --resume con ese id",
+    "Imposible — las corridas headless no comparten contexto",
+    "Ambos scripts deben correr dentro del mismo worktree"
+   ]
   },
   {
    "id": "sim03-q18",
    "origen": "simulacro-03",
    "tema": "automatizacion",
    "subtema": "GitHub Actions",
+   "sub": "c4-actions",
    "curso": 0,
    "escenario": {
     "titulo": "Scenario C — Quanta Metrics",
-    "texto": "Quanta Metrics is wiring Claude Code into scripts, CI, and GitHub — and needs each run to be fast, structured, and verifiable."
+    "texto": "Quanta Metrics is wiring Claude Code into scripts, CI, and GitHub — and needs each run to be fast, structured, and verifiable.",
+    "titulo_es": "Escenario C — Quanta Metrics",
+    "texto_es": "Quanta Metrics está integrando Claude Code a scripts, CI y GitHub — y necesita que cada corrida sea rápida, estructurada y verificable."
    },
    "stem": "Management asks: \"Can managed Code Review auto-apply its fixes and hard-block PRs with critical findings?\" The accurate answer:",
    "opciones": [
@@ -1260,17 +1950,27 @@
    ],
    "correcta": "D",
    "explicacion": "<b>D.</b> Regla flash #7: el servicio <b>señala; el humano decide</b>. Ni aprueba, ni bloquea, ni auto-arregla — el fix es local con <code>/code-review --fix</code>.",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "La dirección pregunta: \"¿El Code Review administrado puede auto-aplicar sus arreglos y bloquear en duro los PRs con findings críticos?\" La respuesta precisa:",
+   "opciones_es": [
+    "Sí a ambas — se configura en admin settings",
+    "Bloquea pero no arregla",
+    "Arregla pero nunca bloquea",
+    "Ninguna: solo publica findings — nunca aprueba ni bloquea, no hay autofix administrado; los arreglos se aplican localmente con /code-review --fix"
+   ]
   },
   {
    "id": "sim03-q19",
    "origen": "simulacro-03",
    "tema": "automatizacion",
    "subtema": "GitHub Actions",
+   "sub": "c4-actions",
    "curso": 0,
    "escenario": {
     "titulo": "Scenario C — Quanta Metrics",
-    "texto": "Quanta Metrics is wiring Claude Code into scripts, CI, and GitHub — and needs each run to be fast, structured, and verifiable."
+    "texto": "Quanta Metrics is wiring Claude Code into scripts, CI, and GitHub — and needs each run to be fast, structured, and verifiable.",
+    "titulo_es": "Escenario C — Quanta Metrics",
+    "texto_es": "Quanta Metrics está integrando Claude Code a scripts, CI y GitHub — y necesita que cada corrida sea rápida, estructurada y verificable."
    },
    "stem": "Quanta's claude-code-action workflow sets <code>use_vertex: true</code>. Does it need the anthropic_api_key secret?",
    "opciones": [
@@ -1281,17 +1981,27 @@
    ],
    "correcta": "A",
    "explicacion": "<b>A.</b> Regla flash #8 (verificada en docs): la key es <b>condicional</b> — requerida con la Claude API directa; con Bedrock/Vertex/Foundry/OAuth/WIF no se usa.",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "El workflow de claude-code-action de Quanta pone <code>use_vertex: true</code>. ¿Necesita el secret anthropic_api_key?",
+   "opciones_es": [
+    "No — la key es solo para la Claude API directa; Vertex (como Bedrock y Foundry) autentica vía OIDC",
+    "Sí — cada corrida del claude-code-action la requiere",
+    "Sí, pero solo como placeholder vacío",
+    "No — el action nunca autentica de ninguna forma"
+   ]
   },
   {
    "id": "sim03-q20",
    "origen": "simulacro-03",
    "tema": "claude-code",
    "subtema": "Steering",
+   "sub": "c4-steering",
    "curso": 0,
    "escenario": {
     "titulo": "Scenario C — Quanta Metrics",
-    "texto": "Quanta Metrics is wiring Claude Code into scripts, CI, and GitHub — and needs each run to be fast, structured, and verifiable."
+    "texto": "Quanta Metrics is wiring Claude Code into scripts, CI, and GitHub — and needs each run to be fast, structured, and verifiable.",
+    "titulo_es": "Escenario C — Quanta Metrics",
+    "texto_es": "Quanta Metrics está integrando Claude Code a scripts, CI y GitHub — y necesita que cada corrida sea rápida, estructurada y verificable."
    },
    "stem": "Quanta wants an autonomous run to continue until the job is genuinely done. Remembering that the /goal evaluator only reads the transcript, which goal works?",
    "opciones": [
@@ -1302,17 +2012,27 @@
    ],
    "correcta": "C",
    "explicacion": "<b>C.</b> La condición debe ser <b>verificable en el output impreso</b> (tests, type checker). \"Production-ready\" y \"nada importante roto\" no aparecen en ningún transcript como hecho verificable.",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "Quanta quiere que una corrida autónoma continúe hasta que el trabajo esté genuinamente terminado. Recordando que el evaluador de /goal solo lee el transcript, ¿qué goal funciona?",
+   "opciones_es": [
+    "<code>/goal the migration is production-ready</code>",
+    "<code>/goal the team approves of the changes</code>",
+    "<code>/goal npm test exits green and tsc reports zero errors</code>",
+    "<code>/goal nothing important is broken</code>"
+   ]
   },
   {
    "id": "sim04-q01",
    "origen": "simulacro-04",
    "tema": "hooks-permisos",
    "subtema": "Hooks",
+   "sub": "c4-hooks",
    "curso": 0,
    "escenario": {
     "titulo": "Scenario A — Orbita Studio",
-    "texto": "Orbita Studio is hardening its hooks and permission setup after a near-miss where a credential almost reached an external service during an unattended run."
+    "texto": "Orbita Studio is hardening its hooks and permission setup after a near-miss where a credential almost reached an external service during an unattended run.",
+    "titulo_es": "Escenario A — Orbita Studio",
+    "texto_es": "Orbita Studio está endureciendo su setup de hooks y permisos después de un casi-incidente en el que una credencial estuvo a punto de llegar a un servicio externo durante una corrida desatendida."
    },
    "stem": "Claude is about to run a deploy command that embeds <code>DB_PASSWORD=hunter2</code> inline. The deploy itself is approved work. Which PreToolUse response handles it best?",
    "opciones": [
@@ -1323,17 +2043,27 @@
    ],
    "correcta": "B",
    "explicacion": "<b>B.</b> 🔥 Reincidente #1: <b>redactar, no bloquear</b> — <code>updatedInput</code> reescribe la llamada y el trabajo legítimo continúa. Recuerda el catch: reemplaza el input COMPLETO (devuelve lo que no cambias). Exit 1 (C) ni bloquea ni avisa a Claude.",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "Claude está por correr un comando de deploy que trae <code>DB_PASSWORD=hunter2</code> incrustado. El deploy en sí es trabajo aprobado. ¿Qué respuesta PreToolUse lo maneja mejor?",
+   "opciones_es": [
+    "permissionDecision \"deny\" — ningún comando con credenciales puede correr",
+    "Devolver updatedInput con la contraseña cambiada por una referencia a variable de entorno, devolviendo intacto el resto del input — el deploy corre, la credencial no se fuga",
+    "Exit code 1 con advertencia para que Claude reconsidere",
+    "permissionDecision \"ask\" en cada comando, siempre"
+   ]
   },
   {
    "id": "sim04-q02",
    "origen": "simulacro-04",
    "tema": "hooks-permisos",
    "subtema": "Hooks",
+   "sub": "c4-hooks",
    "curso": 0,
    "escenario": {
     "titulo": "Scenario A — Orbita Studio",
-    "texto": "Orbita Studio is hardening its hooks and permission setup after a near-miss where a credential almost reached an external service during an unattended run."
+    "texto": "Orbita Studio is hardening its hooks and permission setup after a near-miss where a credential almost reached an external service during an unattended run.",
+    "titulo_es": "Escenario A — Orbita Studio",
+    "texto_es": "Orbita Studio está endureciendo su setup de hooks y permisos después de un casi-incidente en el que una credencial estuvo a punto de llegar a un servicio externo durante una corrida desatendida."
    },
    "stem": "Orbita wants it to be IMPOSSIBLE for Claude to declare a run finished while the linter fails — and wants Claude to see the failure and self-correct. The wiring is:",
    "opciones": [
@@ -1344,17 +2074,27 @@
    ],
    "correcta": "D",
    "explicacion": "<b>D.</b> 🔥 Reincidente #3: el gate del turno es el <b>Stop hook + exit 2</b> — bloquea el \"terminé\" y el stderr regresa a Claude para que arregle solo. Exit 1 (C) no bloquea; CLAUDE.md (A) es una petición, no una garantía.",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "Orbita quiere que sea IMPOSIBLE que Claude declare terminada una corrida mientras el linter falle — y que Claude vea el fallo y se auto-corrija. El cableado es:",
+   "opciones_es": [
+    "CLAUDE.md: \"IMPORTANT: never finish with lint errors\"",
+    "Un hook PreToolUse negando todas las llamadas de Edit cuando el lint falle",
+    "Un hook PostToolUse con exit code 1 tras cada edición",
+    "Un Stop hook que corra el linter y salga con 2 si falla — el turno no puede terminar y el stderr regresa a Claude"
+   ]
   },
   {
    "id": "sim04-q03",
    "origen": "simulacro-04",
    "tema": "hooks-permisos",
    "subtema": "Hooks",
+   "sub": "c4-hooks",
    "curso": 0,
    "escenario": {
     "titulo": "Scenario A — Orbita Studio",
-    "texto": "Orbita Studio is hardening its hooks and permission setup after a near-miss where a credential almost reached an external service during an unattended run."
+    "texto": "Orbita Studio is hardening its hooks and permission setup after a near-miss where a credential almost reached an external service during an unattended run.",
+    "titulo_es": "Escenario A — Orbita Studio",
+    "texto_es": "Orbita Studio está endureciendo su setup de hooks y permisos después de un casi-incidente en el que una credencial estuvo a punto de llegar a un servicio externo durante una corrida desatendida."
    },
    "stem": "A PostToolUse hook exits 0 and prints a plain-text tip (\"remember to update the changelog\"). What does Claude see?",
    "opciones": [
@@ -1365,17 +2105,27 @@
    ],
    "correcta": "A",
    "explicacion": "<b>A.</b> Detalle fino de exit 0: texto plano solo entra al contexto en <b>SessionStart / UserPromptSubmit / UserPromptExpansion</b> — en PostToolUse se ignora. Para hablarle a Claude desde PostToolUse: JSON, o exit 2 con stderr.",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "Un hook PostToolUse sale con 0 e imprime un tip en texto plano (\"remember to update the changelog\"). ¿Qué ve Claude?",
+   "opciones_es": [
+    "Nada — el texto plano con exit 0 se ignora en la mayoría de los eventos; solo entra al contexto en SessionStart, UserPromptSubmit y UserPromptExpansion",
+    "El tip se agrega al contexto en cualquier evento cuando el exit code es 0",
+    "El tip bloquea el siguiente tool call hasta ser reconocido",
+    "Claude Code lanza un error de configuración de hook"
+   ]
   },
   {
    "id": "sim04-q04",
    "origen": "simulacro-04",
    "tema": "hooks-permisos",
    "subtema": "Hooks",
+   "sub": "c4-hooks",
    "curso": 0,
    "escenario": {
     "titulo": "Scenario A — Orbita Studio",
-    "texto": "Orbita Studio is hardening its hooks and permission setup after a near-miss where a credential almost reached an external service during an unattended run."
+    "texto": "Orbita Studio is hardening its hooks and permission setup after a near-miss where a credential almost reached an external service during an unattended run.",
+    "titulo_es": "Escenario A — Orbita Studio",
+    "texto_es": "Orbita Studio está endureciendo su setup de hooks y permisos después de un casi-incidente en el que una credencial estuvo a punto de llegar a un servicio externo durante una corrida desatendida."
    },
    "stem": "After /compact, Claude loses track of the three services being migrated. The fix that actually re-enters the conversation is:",
    "opciones": [
@@ -1386,17 +2136,27 @@
    ],
    "correcta": "C",
    "explicacion": "<b>C.</b> El trip-up oficial, ya tuyo: <b>SessionStart + matcher compact</b> es el que devuelve output a la conversación. PostCompact no. (La acertaste en el sim 3 — consolidando.)",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "Después de /compact, Claude pierde el hilo de los tres servicios en migración. El arreglo que realmente re-entra a la conversación es:",
+   "opciones_es": [
+    "Un hook PostCompact imprimiendo la lista de servicios",
+    "Un hook PreCompact guardando la lista en disco",
+    "Un hook SessionStart con el matcher compact imprimiendo un resumen breve — su output regresa al contexto",
+    "Subir el tamaño del context window en settings.json"
+   ]
   },
   {
    "id": "sim04-q05",
    "origen": "simulacro-04",
    "tema": "hooks-permisos",
    "subtema": "Permission modes",
+   "sub": "c4-permisos",
    "curso": 0,
    "escenario": {
     "titulo": "Scenario A — Orbita Studio",
-    "texto": "Orbita Studio is hardening its hooks and permission setup after a near-miss where a credential almost reached an external service during an unattended run."
+    "texto": "Orbita Studio is hardening its hooks and permission setup after a near-miss where a credential almost reached an external service during an unattended run.",
+    "titulo_es": "Escenario A — Orbita Studio",
+    "texto_es": "Orbita Studio está endureciendo su setup de hooks y permisos después de un casi-incidente en el que una credencial estuvo a punto de llegar a un servicio externo durante una corrida desatendida."
    },
    "stem": "A teammate spins up a disposable Docker container to let Claude churn through a risky migration with zero prompts, and asks which mode is appropriate THERE — and why not on their laptop. The answer:",
    "opciones": [
@@ -1407,17 +2167,27 @@
    ],
    "correcta": "B",
    "explicacion": "<b>B.</b> 🔥 Reincidente #2: <b>bypass = solo contenedor/VM aislado</b>. En bypass NO hay clasificador (D es falso) — cero checks. En tu máquina real: auto mode.",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "Un compañero levanta un contenedor Docker desechable para que Claude avance una migración riesgosa sin ningún prompt, y pregunta qué modo es apropiado AHÍ — y por qué no en su laptop. La respuesta:",
+   "opciones_es": [
+    "Auto en el contenedor; bypass en la laptop está bien si los prompts son cuidadosos",
+    "Bypass permissions es aceptable dentro del contenedor aislado; en una laptop no — ahí auto mode conserva la red de seguridad del clasificador",
+    "Don't ask en ambos — es el modo más estricto",
+    "Bypass en todos lados — el clasificador sigue revisando cada acción bajo bypass"
+   ]
   },
   {
    "id": "sim04-q06",
    "origen": "simulacro-04",
    "tema": "hooks-permisos",
    "subtema": "Permission modes",
+   "sub": "c4-permisos",
    "curso": 0,
    "escenario": {
     "titulo": "Scenario A — Orbita Studio",
-    "texto": "Orbita Studio is hardening its hooks and permission setup after a near-miss where a credential almost reached an external service during an unattended run."
+    "texto": "Orbita Studio is hardening its hooks and permission setup after a near-miss where a credential almost reached an external service during an unattended run.",
+    "titulo_es": "Escenario A — Orbita Studio",
+    "texto_es": "Orbita Studio está endureciendo su setup de hooks y permisos después de un casi-incidente en el que una credencial estuvo a punto de llegar a un servicio externo durante una corrida desatendida."
    },
    "stem": "A dev is iterating fast on a feature and will review the changes afterward — they want file edits and common commands to flow without prompts, but NOT a fully hands-off run. Which mode?",
    "opciones": [
@@ -1428,17 +2198,27 @@
    ],
    "correcta": "A",
    "explicacion": "<b>A.</b> <b>Accept edits</b>: lecturas + ediciones + bash común sin preguntar — \"for iterating on code that you review after the fact\". Auto (B) ya es hands-off con clasificador; no es lo pedido.",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "Un dev itera rápido sobre un feature y revisará los cambios después — quiere que las ediciones de archivos y comandos comunes fluyan sin prompts, pero NO una corrida totalmente hands-off. ¿Qué modo?",
+   "opciones_es": [
+    "Accept edits",
+    "Auto",
+    "Plan",
+    "Don't ask"
+   ]
   },
   {
    "id": "sim04-q07",
    "origen": "simulacro-04",
    "tema": "hooks-permisos",
    "subtema": "Permission modes",
+   "sub": "c4-permisos",
    "curso": 0,
    "escenario": {
     "titulo": "Scenario A — Orbita Studio",
-    "texto": "Orbita Studio is hardening its hooks and permission setup after a near-miss where a credential almost reached an external service during an unattended run."
+    "texto": "Orbita Studio is hardening its hooks and permission setup after a near-miss where a credential almost reached an external service during an unattended run.",
+    "titulo_es": "Escenario A — Orbita Studio",
+    "texto_es": "Orbita Studio está endureciendo su setup de hooks y permisos después de un casi-incidente en el que una credencial estuvo a punto de llegar a un servicio externo durante una corrida desatendida."
    },
    "stem": "In auto mode, which pair correctly describes what the classifier blocks vs. waves through?",
    "opciones": [
@@ -1449,17 +2229,27 @@
    ],
    "correcta": "C",
    "explicacion": "<b>C.</b> El clasificador guarda <b>intención</b>: bloquea escaladas (prod deploys, force push, pipe-to-shell, exfiltración) y deja pasar el trabajo cotidiano. D es LA trampa: \"broken isn't dangerous\" — la corrección no es su trabajo.",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "En auto mode, ¿qué par describe correctamente lo que el clasificador bloquea vs. deja pasar?",
+   "opciones_es": [
+    "Bloquea: instalar dependencias · Permite: force push",
+    "Bloquea: cualquier edición de archivo · Permite: solicitudes de solo lectura",
+    "Bloquea: deploys a producción, force pushes, pipe de código descargado a un shell · Permite: ediciones locales, instalaciones del lock file, push a tu propia rama",
+    "Bloquea: código incorrecto · Permite: código correcto"
+   ]
   },
   {
    "id": "sim04-q08",
    "origen": "simulacro-04",
    "tema": "skills",
    "subtema": "Skills (curso 1)",
+   "sub": "c1-fundamentos",
    "curso": 0,
    "escenario": {
     "titulo": "Scenario B — Faro Health",
-    "texto": "Faro Health runs a mature skills setup across its repos and delegates specialized reviews to custom subagents. New hires keep hitting the classic pitfalls."
+    "texto": "Faro Health runs a mature skills setup across its repos and delegates specialized reviews to custom subagents. New hires keep hitting the classic pitfalls.",
+    "titulo_es": "Escenario B — Faro Health",
+    "texto_es": "Faro Health opera un setup maduro de skills en sus repos y delega revisiones especializadas a subagents personalizados. Los nuevos integrantes siguen cayendo en las trampas clásicas."
    },
    "stem": "Which line of \"skill math\" is entirely correct?",
    "opciones": [
@@ -1470,17 +2260,27 @@
    ],
    "correcta": "D",
    "explicacion": "<b>D.</b> Los números sagrados: <b>64 · 1,024 · 500</b>. (Dos campos requeridos + dos opcionales completan la ficha.)",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "¿Qué línea de \"matemática de skills\" es completamente correcta?",
+   "opciones_es": [
+    "name ≤ 128 chars · description ≤ 512 · SKILL.md ≤ 1,000 líneas",
+    "name ≤ 64 · description ≤ 2,048 · SKILL.md ≤ 500 líneas",
+    "name ≤ 32 · description ≤ 1,024 · SKILL.md ≤ 250 líneas",
+    "name ≤ 64 chars · description ≤ 1,024 chars · SKILL.md bajo ~500 líneas (guía)"
+   ]
   },
   {
    "id": "sim04-q09",
    "origen": "simulacro-04",
    "tema": "skills",
    "subtema": "Skills (curso 1)",
+   "sub": "c1-fundamentos",
    "curso": 0,
    "escenario": {
     "titulo": "Scenario B — Faro Health",
-    "texto": "Faro Health runs a mature skills setup across its repos and delegates specialized reviews to custom subagents. New hires keep hitting the classic pitfalls."
+    "texto": "Faro Health runs a mature skills setup across its repos and delegates specialized reviews to custom subagents. New hires keep hitting the classic pitfalls.",
+    "titulo_es": "Escenario B — Faro Health",
+    "texto_es": "Faro Health opera un setup maduro de skills en sus repos y delega revisiones especializadas a subagents personalizados. Los nuevos integrantes siguen cayendo en las trampas clásicas."
    },
    "stem": "A repo ships a project skill <code>data-checks</code>; an installed plugin brings its own <code>data-checks</code>. No personal or enterprise version exists. Which one runs?",
    "opciones": [
@@ -1491,17 +2291,27 @@
    ],
    "correcta": "B",
    "explicacion": "<b>B.</b> E-P-P-P de abajo hacia arriba: <b>Plugins es SIEMPRE la prioridad más baja</b> — código de terceros nunca le gana a lo tuyo ni a lo del repo.",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "Un repo trae una skill de proyecto <code>data-checks</code>; un plugin instalado trae su propia <code>data-checks</code>. No existe versión personal ni enterprise. ¿Cuál corre?",
+   "opciones_es": [
+    "La del plugin — los plugins van namespaced así que siempre ganan",
+    "La del proyecto — en E-P-P-P, Project está por encima de Plugins",
+    "Ambas corren y se fusionan",
+    "Ninguna — nombres iguales causan un error duro"
+   ]
   },
   {
    "id": "sim04-q10",
    "origen": "simulacro-04",
    "tema": "skills",
    "subtema": "Skills (curso 1)",
+   "sub": "c1-fundamentos",
    "curso": 0,
    "escenario": {
     "titulo": "Scenario B — Faro Health",
-    "texto": "Faro Health runs a mature skills setup across its repos and delegates specialized reviews to custom subagents. New hires keep hitting the classic pitfalls."
+    "texto": "Faro Health runs a mature skills setup across its repos and delegates specialized reviews to custom subagents. New hires keep hitting the classic pitfalls.",
+    "titulo_es": "Escenario B — Faro Health",
+    "texto_es": "Faro Health opera un setup maduro de skills en sus repos y delega revisiones especializadas a subagents personalizados. Los nuevos integrantes siguen cayendo en las trampas clásicas."
    },
    "stem": "How does Claude decide that \"why is this endpoint returning 500s?\" should activate the <code>api-debugging</code> skill?",
    "opciones": [
@@ -1512,17 +2322,27 @@
    ],
    "correcta": "A",
    "explicacion": "<b>A.</b> Matching <b>semántico</b> (intención, no keywords exactas) sobre las <b>descriptions</b> precargadas — y con confirmación antes de cargar el contenido completo. No es búsqueda vectorial (D): el modelo lee la lista en contexto y juzga.",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "¿Cómo decide Claude que \"why is this endpoint returning 500s?\" debe activar la skill <code>api-debugging</code>?",
+   "opciones_es": [
+    "Compara semánticamente la petición contra cada description cargada; suficiente overlap de intención → match → confirmación del usuario → carga el SKILL.md completo",
+    "Corre una búsqueda exacta de keywords sobre los nombres de skills",
+    "Carga todos los SKILL.md al arranque y elige el que mejor encaje",
+    "Una base vectorial calcula similitud coseno sobre embeddings"
+   ]
   },
   {
    "id": "sim04-q11",
    "origen": "simulacro-04",
    "tema": "subagents",
    "subtema": "Subagents",
+   "sub": "c1-subagents",
    "curso": 0,
    "escenario": {
     "titulo": "Scenario B — Faro Health",
-    "texto": "Faro Health runs a mature skills setup across its repos and delegates specialized reviews to custom subagents. New hires keep hitting the classic pitfalls."
+    "texto": "Faro Health runs a mature skills setup across its repos and delegates specialized reviews to custom subagents. New hires keep hitting the classic pitfalls.",
+    "titulo_es": "Escenario B — Faro Health",
+    "texto_es": "Faro Health opera un setup maduro de skills en sus repos y delega revisiones especializadas a subagents personalizados. Los nuevos integrantes siguen cayendo en las trampas clásicas."
    },
    "stem": "A custom subagent declares <code>skills: hipaa-check, style-guide</code>. When and how do those skills enter its context?",
    "opciones": [
@@ -1533,17 +2353,27 @@
    ],
    "correcta": "C",
    "explicacion": "<b>C.</b> En subagents no hay progressive disclosure de skills: <b>cargan al arrancar, completas</b>. Por eso: lista corta y siempre-relevante.",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "Un subagent personalizado declara <code>skills: hipaa-check, style-guide</code>. ¿Cuándo y cómo entran esas skills a su contexto?",
+   "opciones_es": [
+    "On demand, cuando su tarea hace match con cada description",
+    "Nunca — el campo es solo documentación",
+    "Ambas cargan completas al arrancar el subagent — sin matching ni confirmación — por eso solo las siempre-relevantes van en la lista",
+    "Solo después de que la conversación principal confirme cada una"
+   ]
   },
   {
    "id": "sim04-q12",
    "origen": "simulacro-04",
    "tema": "subagents",
    "subtema": "Subagents",
+   "sub": "c1-subagents",
    "curso": 0,
    "escenario": {
     "titulo": "Scenario B — Faro Health",
-    "texto": "Faro Health runs a mature skills setup across its repos and delegates specialized reviews to custom subagents. New hires keep hitting the classic pitfalls."
+    "texto": "Faro Health runs a mature skills setup across its repos and delegates specialized reviews to custom subagents. New hires keep hitting the classic pitfalls.",
+    "titulo_es": "Escenario B — Faro Health",
+    "texto_es": "Faro Health opera un setup maduro de skills en sus repos y delega revisiones especializadas a subagents personalizados. Los nuevos integrantes siguen cayendo en las trampas clásicas."
    },
    "stem": "A new hire configures the built-in Verify agent with a <code>skills:</code> list in settings and expects it to work. Reality?",
    "opciones": [
@@ -1554,17 +2384,27 @@
    ],
    "correcta": "D",
    "explicacion": "<b>D.</b> Built-in (Explore, Plan, Verify) = <b>jamás</b> skills. La única ruta: crear un subagent <b>custom</b> con el campo <code>skills:</code> (y el tool Skill disponible).",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "Un nuevo integrante configura el agente built-in Verify con una lista skills: en settings y espera que funcione. ¿Realidad?",
+   "opciones_es": [
+    "Funciona — cualquier agente acepta una lista de skills",
+    "Funciona solo para skills de nivel enterprise",
+    "Verify hereda automáticamente las skills activas de la conversación principal",
+    "No puede funcionar — los agentes built-in no acceden a skills en absoluto; solo los subagents personalizados de .claude/agents, vía su propio frontmatter"
+   ]
   },
   {
    "id": "sim04-q13",
    "origen": "simulacro-04",
    "tema": "troubleshooting",
    "subtema": "Troubleshooting skills",
+   "sub": "c1-ts",
    "curso": 0,
    "escenario": {
     "titulo": "Scenario B — Faro Health",
-    "texto": "Faro Health runs a mature skills setup across its repos and delegates specialized reviews to custom subagents. New hires keep hitting the classic pitfalls."
+    "texto": "Faro Health runs a mature skills setup across its repos and delegates specialized reviews to custom subagents. New hires keep hitting the classic pitfalls.",
+    "titulo_es": "Escenario B — Faro Health",
+    "texto_es": "Faro Health opera un setup maduro de skills en sus repos y delega revisiones especializadas a subagents personalizados. Los nuevos integrantes siguen cayendo en las trampas clásicas."
    },
    "stem": "After installing a teammate's plugin, its skills don't show up. The course's recovery sequence is:",
    "opciones": [
@@ -1575,17 +2415,27 @@
    ],
    "correcta": "B",
    "explicacion": "<b>B.</b> La secuencia literal: <b>clear cache → restart → reinstall → validator</b>. (C funcionaría como hack pero cambia el nivel de prioridad y pierdes updates — no es lo que enseña el curso.)",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "Tras instalar el plugin de un compañero, sus skills no aparecen. La secuencia de recuperación del curso es:",
+   "opciones_es": [
+    "Renombrar cada carpeta de skill y reiniciar",
+    "Limpiar el caché, reiniciar Claude Code, reinstalar — y si aún no aparecen, correr el validator (la estructura del plugin puede estar mal)",
+    "Mover las skills del plugin a ~/.claude/skills a mano",
+    "Reinstalar Claude Code desde cero"
+   ]
   },
   {
    "id": "sim04-q14",
    "origen": "simulacro-04",
    "tema": "contexto",
    "subtema": "Context management",
+   "sub": "c1-pd",
    "curso": 0,
    "escenario": {
     "titulo": "Scenario B — Faro Health",
-    "texto": "Faro Health runs a mature skills setup across its repos and delegates specialized reviews to custom subagents. New hires keep hitting the classic pitfalls."
+    "texto": "Faro Health runs a mature skills setup across its repos and delegates specialized reviews to custom subagents. New hires keep hitting the classic pitfalls.",
+    "titulo_es": "Escenario B — Faro Health",
+    "texto_es": "Faro Health opera un setup maduro de skills en sus repos y delega revisiones especializadas a subagents personalizados. Los nuevos integrantes siguen cayendo en las trampas clásicas."
    },
    "stem": "A skill needs a 400-line data-normalization routine that must behave identically every run. Cheapest-in-context correct design?",
    "opciones": [
@@ -1596,17 +2446,27 @@
    ],
    "correcta": "A",
    "explicacion": "<b>A.</b> Scripts se <b>EJECUTAN</b> (400 líneas de código → quizá 3 de output) y son <b>deterministas</b>. references/ (C) se LEE — pagarías las 400 líneas en contexto y Claude aún tendría que ejecutar la lógica él mismo.",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "Una skill necesita una rutina de normalización de datos de 400 líneas que debe comportarse idéntico en cada corrida. ¿Diseño correcto y más barato en contexto?",
+   "opciones_es": [
+    "Empaquetarla como script probado en scripts/ e instruir \"run the script, not read it\" — solo su salida impresa consume tokens, y el código probado es determinista",
+    "Pegar la rutina en SKILL.md para que siempre esté disponible",
+    "Ponerla en references/ para que Claude la lea cuando la necesite",
+    "Describir el algoritmo en prosa y que Claude lo re-derive en cada corrida"
+   ]
   },
   {
    "id": "sim04-q15",
    "origen": "simulacro-04",
    "tema": "automatizacion",
    "subtema": "Automatización",
+   "sub": "c4-auto",
    "curso": 0,
    "escenario": {
     "titulo": "Scenario C — Kappa Logistics",
-    "texto": "Kappa Logistics is productionizing Claude Code: scripted runs, scheduled routines, and a review pipeline on GitHub."
+    "texto": "Kappa Logistics is productionizing Claude Code: scripted runs, scheduled routines, and a review pipeline on GitHub.",
+    "titulo_es": "Escenario C — Kappa Logistics",
+    "texto_es": "Kappa Logistics está llevando Claude Code a producción: corridas por script, routines programadas y un pipeline de revisión en GitHub."
    },
    "stem": "Phase 1 (a planning run) finishes at 6am; phase 2 must execute that plan at 9am with full knowledge of phase 1's reasoning. The mechanism:",
    "opciones": [
@@ -1617,17 +2477,27 @@
    ],
    "correcta": "C",
    "explicacion": "<b>C.</b> 🔥 Reincidente #4: <b><code>session_id</code> + <code>claude --resume</code></b> — \"one script kicks off the work, another resumes it later with full context\". Un resumen pegado (A) pierde el razonamiento completo.",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "La fase 1 (una corrida de planeación) termina a las 6am; la fase 2 debe ejecutar ese plan a las 9am con conocimiento completo del razonamiento de la fase 1. El mecanismo:",
+   "opciones_es": [
+    "Guardar el resumen de la fase 1 en un archivo y pegarlo en el prompt de la fase 2",
+    "Correr ambas fases dentro de un solo script con sleep",
+    "La fase 1 emite JSON; capturar su session_id, y la fase 2 corre claude --resume con él — contexto completo restaurado",
+    "Imposible entre invocaciones separadas"
+   ]
   },
   {
    "id": "sim04-q16",
    "origen": "simulacro-04",
    "tema": "automatizacion",
    "subtema": "Automatización",
+   "sub": "c4-auto",
    "curso": 0,
    "escenario": {
     "titulo": "Scenario C — Kappa Logistics",
-    "texto": "Kappa Logistics is productionizing Claude Code: scripted runs, scheduled routines, and a review pipeline on GitHub."
+    "texto": "Kappa Logistics is productionizing Claude Code: scripted runs, scheduled routines, and a review pipeline on GitHub.",
+    "titulo_es": "Escenario C — Kappa Logistics",
+    "texto_es": "Kappa Logistics está llevando Claude Code a producción: corridas por script, routines programadas y un pipeline de revisión en GitHub."
    },
    "stem": "A cron job must run Claude with the fastest startup and zero pickup of local hooks/skills/MCP/CLAUDE.md. Per the verified docs:",
    "opciones": [
@@ -1638,17 +2508,27 @@
    ],
    "correcta": "B",
    "explicacion": "<b>B.</b> Verificado contra docs: <b>--bare</b> salta la auto-discovery (y será el default de -p en el futuro — hoy no). La clavaste en el sim 3 — consolidando. ✔",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "Un cron job debe correr Claude con el arranque más rápido y cero carga de hooks/skills/MCP/CLAUDE.md locales. Según los docs verificados:",
+   "opciones_es": [
+    "<code>claude -p</code> a secas — el modo print ya es aislado",
+    "<code>claude --bare -p \"...\"</code> — --bare salta la auto-discovery; -p a secas carga el entorno local",
+    "<code>claude --headless --fast</code>",
+    "Borrar .claude/ antes de cada corrida"
+   ]
   },
   {
    "id": "sim04-q17",
    "origen": "simulacro-04",
    "tema": "automatizacion",
    "subtema": "Automatización",
+   "sub": "c4-auto",
    "curso": 0,
    "escenario": {
     "titulo": "Scenario C — Kappa Logistics",
-    "texto": "Kappa Logistics is productionizing Claude Code: scripted runs, scheduled routines, and a review pipeline on GitHub."
+    "texto": "Kappa Logistics is productionizing Claude Code: scripted runs, scheduled routines, and a review pipeline on GitHub.",
+    "titulo_es": "Escenario C — Kappa Logistics",
+    "texto_es": "Kappa Logistics está llevando Claude Code a producción: corridas por script, routines programadas y un pipeline de revisión en GitHub."
    },
    "stem": "Which routine plan violates NONE of the three routine limits?",
    "opciones": [
@@ -1659,17 +2539,27 @@
    ],
    "correcta": "D",
    "explicacion": "<b>D.</b> Los límites: research preview · recurrencia <b>máximo cada hora</b> (tumba A y B) · clone fresco que solo pushea a ramas <b>claude/</b> por default (tumba A y C). Diaria + rama claude/ = ✔.",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "¿Qué plan de routine NO viola ninguno de los tres límites de las routines?",
+   "opciones_es": [
+    "Un escaneo de seguridad cada 10 minutos, pusheando parches a main",
+    "Una auditoría de dependencias cada 30 minutos en una rama claude/",
+    "Un reporte diario que pushea directo a main por default",
+    "Un triage diario de Sentry a las 9am que abre su trabajo en una rama con prefijo claude/"
+   ]
   },
   {
    "id": "sim04-q18",
    "origen": "simulacro-04",
    "tema": "automatizacion",
    "subtema": "GitHub Actions",
+   "sub": "c4-actions",
    "curso": 0,
    "escenario": {
     "titulo": "Scenario C — Kappa Logistics",
-    "texto": "Kappa Logistics is productionizing Claude Code: scripted runs, scheduled routines, and a review pipeline on GitHub."
+    "texto": "Kappa Logistics is productionizing Claude Code: scripted runs, scheduled routines, and a review pipeline on GitHub.",
+    "titulo_es": "Escenario C — Kappa Logistics",
+    "texto_es": "Kappa Logistics está llevando Claude Code a producción: corridas por script, routines programadas y un pipeline de revisión en GitHub."
    },
    "stem": "Kappa's unattended nightly workflow uses claude-code-action. Which claude_args trio matches the course's tuning advice?",
    "opciones": [
@@ -1680,17 +2570,27 @@
    ],
    "correcta": "A",
    "explicacion": "<b>A.</b> Los 3 knobs: <b>tope de turnos</b> + <b>modo que no pregunte</b> (sin humano, un prompt cuelga el pipeline) + <b>herramientas mínimas</b>. Amarra L4 (modos) + curso 1 (allowed-tools).",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "El workflow nocturno desatendido de Kappa usa claude-code-action. ¿Qué trío de claude_args coincide con el consejo de afinación del curso?",
+   "opciones_es": [
+    "Un tope --max-turns para que el loop no corra por siempre · un permission mode que nunca se detenga a preguntar · allowed tools recortadas a exactamente lo que el job necesita (solo lectura para un reporte)",
+    "Turnos ilimitados · bypass permissions · todas las herramientas habilitadas",
+    "Logging --verbose · modo manual · acceso total a herramientas",
+    "Salida en streaming · plan mode · sin herramientas"
+   ]
   },
   {
    "id": "sim04-q19",
    "origen": "simulacro-04",
    "tema": "automatizacion",
    "subtema": "GitHub Actions",
+   "sub": "c4-actions",
    "curso": 0,
    "escenario": {
     "titulo": "Scenario C — Kappa Logistics",
-    "texto": "Kappa Logistics is productionizing Claude Code: scripted runs, scheduled routines, and a review pipeline on GitHub."
+    "texto": "Kappa Logistics is productionizing Claude Code: scripted runs, scheduled routines, and a review pipeline on GitHub.",
+    "titulo_es": "Escenario C — Kappa Logistics",
+    "texto_es": "Kappa Logistics está llevando Claude Code a producción: corridas por script, routines programadas y un pipeline de revisión en GitHub."
    },
    "stem": "The security lead asks whether managed Code Review can be their enforcement gate: auto-blocking bad PRs and pushing fixes. Correct answer:",
    "opciones": [
@@ -1701,17 +2601,27 @@
    ],
    "correcta": "C",
    "explicacion": "<b>C.</b> Las fronteras: <b>señala, no decide</b> — nunca aprueba/bloquea, sin autofix administrado. La clavaste 2 veces seguidas — cerrada. ✔",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "El líder de seguridad pregunta si el Code Review administrado puede ser su compuerta de enforcement: auto-bloqueando PRs malos y pusheando arreglos. Respuesta correcta:",
+   "opciones_es": [
+    "Sí — activa el \"strict mode\" en la app de GitHub",
+    "Bloquea, pero el arreglo es manual",
+    "No — solo publica findings rankeados y deduplicados; nunca aprueba ni bloquea, y los arreglos se aplican localmente con /code-review --fix. Para enforcement, cablea tus propios checks",
+    "Sí, pero solo en planes enterprise"
+   ]
   },
   {
    "id": "sim04-q20",
    "origen": "simulacro-04",
    "tema": "claude-code",
    "subtema": "Verificación",
+   "sub": "c4-trust",
    "curso": 0,
    "escenario": {
     "titulo": "Scenario C — Kappa Logistics",
-    "texto": "Kappa Logistics is productionizing Claude Code: scripted runs, scheduled routines, and a review pipeline on GitHub."
+    "texto": "Kappa Logistics is productionizing Claude Code: scripted runs, scheduled routines, and a review pipeline on GitHub.",
+    "titulo_es": "Escenario C — Kappa Logistics",
+    "texto_es": "Kappa Logistics está llevando Claude Code a producción: corridas por script, routines programadas y un pipeline de revisión en GitHub."
    },
    "stem": "An unattended overnight run produced a flawless-sounding summary. Rank the course's verification moves in the right spirit:",
    "opciones": [
@@ -1722,7 +2632,14 @@
    ],
    "correcta": "B",
    "explicacion": "<b>B.</b> \"The less you watched, the more you verify\": <b>diff antes que resumen</b> · gates cableados (Stop+exit 2) · <b>fresh eyes</b> — la misma sesión (C) es juez y parte: \"finds what the author rationalized away\".",
-   "dificultad": null
+   "dificultad": null,
+   "stem_es": "Una corrida nocturna no supervisada produjo un resumen que suena impecable. Ordena los movimientos de verificación del curso con el espíritu correcto:",
+   "opciones_es": [
+    "Confiar en el resumen si los tests se reportaron en verde",
+    "Diff primero (/code-review, luego git diff, vigilando archivos fuera del plan) · tests cableados como gate, no como afirmación · segunda opinión fría de un subagent fresco para lo que importe",
+    "Pedirle a la misma sesión que se revise a sí misma",
+    "Re-correr el job y aceptar si ambos resúmenes coinciden"
+   ]
   },
   {
    "id": "quiz01-q01",
@@ -1740,7 +2657,15 @@
    ],
    "correcta": "B",
    "explicacion": "<b>B.</b> \"Automatically… no exceptions… even if nobody asks\" = evento + garantía = <b>hook</b> (PostToolUse sobre Write/Edit). Una skill (A) y CLAUDE.md (C) dependen del criterio de Claude — probabilístico; el subagent (D) no automatiza nada.",
-   "dificultad": null
+   "dificultad": null,
+   "sub": "c1-vs",
+   "stem_es": "Tu equipo exige que cada archivo que Claude Code escriba sea revisado automáticamente por un formateador — sin excepciones, aunque nadie lo pida. ¿Qué mecanismo encaja mejor?",
+   "opciones_es": [
+    "Una skill con una description que mencione \"format files\"",
+    "Un hook PostToolUse con matcher sobre las llamadas Write/Edit",
+    "Una regla en CLAUDE.md: \"always format files\"",
+    "Un subagent dedicado a formatear"
+   ]
   },
   {
    "id": "quiz01-q02",
@@ -1758,7 +2683,15 @@
    ],
    "correcta": "B",
    "explicacion": "<b>B.</b> Prioridad <b>E-P-P-P</b>: Enterprise → <b>Personal → Project</b> → Plugins. La trampa es A (\"más específico\"): la intuición falla, Personal gana a Project. No hay merge (C) ni diálogo de conflicto (D).",
-   "dificultad": null
+   "dificultad": null,
+   "sub": "c1-prioridad",
+   "stem_es": "Clonas un repo del equipo que trae una skill <code>code-review</code> en <code>.claude/skills/</code>. Tú ya tienes una <code>code-review</code> personal en <code>~/.claude/skills/</code>. Cuando pides una revisión, ¿de quién son las instrucciones que aplican?",
+   "opciones_es": [
+    "La skill del proyecto — la configuración del proyecto es más específica que la personal",
+    "La skill personal — personal tiene mayor prioridad que project",
+    "Ambas se fusionan en un solo set de instrucciones",
+    "Ninguna — Claude reporta conflicto y te pide elegir"
+   ]
   },
   {
    "id": "quiz01-q03",
@@ -1776,7 +2709,15 @@
    ],
    "correcta": "B",
    "explicacion": "<b>B.</b> Solo <b>name + description</b> — la base de la eficiencia de contexto. D describe mal el mecanismo: la lista SÍ se precarga, porque sin ella no habría contra qué hacer el matching.",
-   "dificultad": null
+   "dificultad": null,
+   "sub": "c1-pd",
+   "stem_es": "Al arrancar, ¿qué carga Claude Code al contexto de cada skill disponible?",
+   "opciones_es": [
+    "El SKILL.md completo de cada skill",
+    "Solo los campos <code>name</code> y <code>description</code>",
+    "El frontmatter más las primeras 500 líneas",
+    "Nada — las skills solo se descubren cuando una petición hace match"
+   ]
   },
   {
    "id": "quiz01-q04",
@@ -1794,7 +2735,15 @@
    ],
    "correcta": "C",
    "explicacion": "<b>C.</b> Omitir <code>allowed-tools</code> = <b>sin restricción</b> (modelo de permisos normal). A es la trampa clásica: \"omitido\" NO significa \"sin herramientas\".",
-   "dificultad": null
+   "dificultad": null,
+   "sub": "c1-config",
+   "stem_es": "El frontmatter de un SKILL.md contiene solo <code>name</code> y <code>description</code>. ¿Qué puede hacer Claude con herramientas mientras esta skill está activa?",
+   "opciones_es": [
+    "Nada — sin allowed-tools la skill no puede usar herramienta alguna",
+    "Solo herramientas de lectura como Read y Grep",
+    "Todo lo que su modelo de permisos normal permita — omitir allowed-tools significa sin restricción",
+    "Solo las herramientas mencionadas dentro de las instrucciones de la skill"
+   ]
   },
   {
    "id": "quiz01-q05",
@@ -1812,7 +2761,15 @@
    ],
    "correcta": "B",
    "explicacion": "<b>B.</b> <b>Progressive disclosure</b>: SKILL.md &lt; 500 líneas como índice + <code>references/</code> con condición explícita \"Only load when…\". D pierde contenido; A fragmenta sin necesidad. No se recorta material: se decide CUÁNDO entra.",
-   "dificultad": null
+   "dificultad": null,
+   "sub": "c1-pd",
+   "stem_es": "Tu SKILL.md creció a 1,900 líneas, en su mayoría tablas de referencia que solo importan en casos raros. Siguiendo el estándar abierto, ¿qué haces?",
+   "opciones_es": [
+    "Partirla en dos skills con nombres distintos",
+    "Mover las tablas a archivos de <code>references/</code> enlazados desde SKILL.md con una condición explícita \"only load when...\"",
+    "Subir el campo model para que un modelo más grande aguante el contenido",
+    "Comprimir las tablas en prosa corta para caber bajo 500 líneas"
+   ]
   },
   {
    "id": "quiz01-q06",
@@ -1830,7 +2787,15 @@
    ],
    "correcta": "B",
    "explicacion": "<b>B.</b> <i>\"Tell Claude to run the script, not read it\"</i> — al ejecutar, solo el <b>output</b> consume tokens (300 líneas de código → quizá 3 de salida). Además el código probado es determinista.",
-   "dificultad": null
+   "dificultad": null,
+   "sub": "c1-pd",
+   "stem_es": "Una skill incluye un script de validación de 300 líneas en <code>scripts/</code>. ¿Qué instrucción debe tener el SKILL.md para que el script siga siendo eficiente en contexto, y por qué?",
+   "opciones_es": [
+    "\"Lee el script antes de correrlo\" — para que Claude entienda qué hace",
+    "\"Run the script, not read it\" — al ejecutarlo, solo el output del script entra al contexto",
+    "\"Resume el script\" — un resumen es más barato que el archivo completo",
+    "\"Copia la lógica del script en SKILL.md\" — las instrucciones son más baratas que el código"
+   ]
   },
   {
    "id": "quiz01-q07",
@@ -1848,7 +2813,15 @@
    ],
    "correcta": "C",
    "explicacion": "<b>C.</b> Keyword <b>\"must\"</b> + \"no developer can override\" = <b>enterprise managed settings</b>: prioridad máxima, pisa cualquier skill del mismo nombre. Repo (A) y plugin (B) quedan por debajo de Personal en prioridad.",
-   "dificultad": null
+   "dificultad": null,
+   "sub": "c1-sharing",
+   "stem_es": "Una financiera debe garantizar que una skill de security-review se aplique consistentemente por cada dev, y que ninguno pueda taparla con su propia versión. ¿Qué método de distribución?",
+   "opciones_es": [
+    "Commitear la skill a cada repositorio del equipo",
+    "Publicarla como plugin en un marketplace interno",
+    "Desplegarla vía enterprise managed settings",
+    "Mandar la carpeta por correo para instalación personal"
+   ]
   },
   {
    "id": "quiz01-q08",
@@ -1866,7 +2839,15 @@
    ],
    "correcta": "B",
    "explicacion": "<b>B.</b> El gotcha: los subagents <b>no heredan skills</b> — nacen con contexto limpio; hay que listarlas en <code>skills:</code>. Y recuerda: los built-in (Explore, Plan, Verify) no pueden usarlas en absoluto.",
-   "dificultad": null
+   "dificultad": null,
+   "sub": "c1-subagents",
+   "stem_es": "Creas un subagent personalizado en <code>.claude/agents/reviewer.md</code> y esperas que use tu skill <code>accessibility-audit</code>, pero nunca la aplica. ¿Causa más probable?",
+   "opciones_es": [
+    "El campo model del subagent está muy bajo",
+    "Las skills deben listarse explícitamente en el campo <code>skills:</code> del frontmatter — los subagents no heredan skills",
+    "La skill necesita allowed-tools para funcionar dentro de subagents",
+    "Los subagents solo pueden usar skills enterprise"
+   ]
   },
   {
    "id": "quiz01-q09",
@@ -1884,7 +2865,15 @@
    ],
    "correcta": "B",
    "explicacion": "<b>B.</b> <i>\"The cause is almost always the description\"</i> — falta overlap semántico; agrega las frases que TÚ realmente usas y prueba variaciones (\"why is this slow?\", \"make this faster\").",
-   "dificultad": null
+   "dificultad": null,
+   "sub": "c1-ts",
+   "stem_es": "Una skill existe, pasa el validator y aparece en la lista — pero Claude nunca la usa cuando pides con tus palabras de siempre. Según el curso, ¿cuál es la causa \"casi siempre\", y el arreglo?",
+   "opciones_es": [
+    "Un conflicto de prioridad — renombra la skill",
+    "A la description le falta overlap con cómo formulas tus peticiones — agrega frases-disparador reales",
+    "Un error de sintaxis YAML — re-corre el validator",
+    "La skill es muy larga — aplica progressive disclosure"
+   ]
   },
   {
    "id": "quiz01-q10",
@@ -1902,7 +2891,15 @@
    ],
    "correcta": "C",
    "explicacion": "<b>C.</b> Runtime errors: <b>chmod +x</b> a los scripts + <b>forward slashes ( / ) incluso en Windows</b> (+ dependencias instaladas y anotadas en la description).",
-   "dificultad": null
+   "dificultad": null,
+   "sub": "c1-ts",
+   "stem_es": "Una skill carga bien pero su script falla en runtime en Windows. ¿Qué par de arreglos recomienda el curso?",
+   "opciones_es": [
+    "Renombrar SKILL.md a skill.md y reiniciar",
+    "Mover el script a assets/ y referenciarlo desde la description",
+    "Dar permiso de ejecución a los scripts (chmod +x) y usar forward slashes ( / ) en todas las rutas",
+    "Reinstalar Claude Code y limpiar el caché de plugins"
+   ]
   }
  ],
  "tarjetas": [

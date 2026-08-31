@@ -1,5 +1,5 @@
 /* CCA-F Quiz service worker — shell cache-first, banco network-first */
-const CACHE = "ccaf-shell-v1";
+const CACHE = "ccaf-shell-v2";
 const SHELL = [
   "./", "./index.html", "./styles.css", "./app.js", "./manifest.webmanifest",
   "./icons/icon-192.png", "./icons/icon-512.png", "./icons/icon-512-maskable.png", "./icons/apple-touch-icon.png",
