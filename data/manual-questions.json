@@ -1,0 +1,182 @@
+[
+ {
+  "id": "quiz01-q01",
+  "origen": "quiz-01-agent-skills",
+  "tema": "mecanismos",
+  "subtema": "Elección de mecanismo",
+  "curso": 1,
+  "escenario": null,
+  "stem": "Your team requires that every file Claude Code writes is automatically checked by a formatter — with no exceptions, even if nobody asks for it. Which mechanism fits best?",
+  "opciones": [
+   "A skill with a description mentioning \"format files\"",
+   "A PostToolUse hook matching Write/Edit tool calls",
+   "A CLAUDE.md rule stating \"always format files\"",
+   "A subagent dedicated to formatting"
+  ],
+  "correcta": "B",
+  "explicacion": "<b>B.</b> \"Automatically… no exceptions… even if nobody asks\" = evento + garantía = <b>hook</b> (PostToolUse sobre Write/Edit). Una skill (A) y CLAUDE.md (C) dependen del criterio de Claude — probabilístico; el subagent (D) no automatiza nada.",
+  "dificultad": null
+ },
+ {
+  "id": "quiz01-q02",
+  "origen": "quiz-01-agent-skills",
+  "tema": "skills",
+  "subtema": "Prioridad de skills",
+  "curso": 1,
+  "escenario": null,
+  "stem": "You clone a team repository that ships a <code>code-review</code> skill in <code>.claude/skills/</code>. You already have a personal <code>code-review</code> skill in <code>~/.claude/skills/</code>. When you ask for a review, whose instructions apply?",
+  "opciones": [
+   "The project skill — project settings are more specific than personal ones",
+   "The personal skill — personal has higher priority than project",
+   "Both are merged into one combined instruction set",
+   "Neither — Claude reports a conflict and asks you to choose"
+  ],
+  "correcta": "B",
+  "explicacion": "<b>B.</b> Prioridad <b>E-P-P-P</b>: Enterprise → <b>Personal → Project</b> → Plugins. La trampa es A (\"más específico\"): la intuición falla, Personal gana a Project. No hay merge (C) ni diálogo de conflicto (D).",
+  "dificultad": null
+ },
+ {
+  "id": "quiz01-q03",
+  "origen": "quiz-01-agent-skills",
+  "tema": "contexto",
+  "subtema": "Context management",
+  "curso": 1,
+  "escenario": null,
+  "stem": "At startup, what does Claude Code load into context from each available skill?",
+  "opciones": [
+   "The full SKILL.md file of every skill",
+   "Only the <code>name</code> and <code>description</code> fields",
+   "The frontmatter plus the first 500 lines",
+   "Nothing — skills are only discovered when a request matches"
+  ],
+  "correcta": "B",
+  "explicacion": "<b>B.</b> Solo <b>name + description</b> — la base de la eficiencia de contexto. D describe mal el mecanismo: la lista SÍ se precarga, porque sin ella no habría contra qué hacer el matching.",
+  "dificultad": null
+ },
+ {
+  "id": "quiz01-q04",
+  "origen": "quiz-01-agent-skills",
+  "tema": "skills",
+  "subtema": "Configuración",
+  "curso": 1,
+  "escenario": null,
+  "stem": "A SKILL.md frontmatter contains only <code>name</code> and <code>description</code>. What can Claude do with tools while this skill is active?",
+  "opciones": [
+   "Nothing — without allowed-tools, the skill cannot use any tools",
+   "Only read-only tools like Read and Grep",
+   "Anything its normal permission model allows — omitting allowed-tools means no restriction",
+   "Only the tools mentioned inside the skill's instructions"
+  ],
+  "correcta": "C",
+  "explicacion": "<b>C.</b> Omitir <code>allowed-tools</code> = <b>sin restricción</b> (modelo de permisos normal). A es la trampa clásica: \"omitido\" NO significa \"sin herramientas\".",
+  "dificultad": null
+ },
+ {
+  "id": "quiz01-q05",
+  "origen": "quiz-01-agent-skills",
+  "tema": "contexto",
+  "subtema": "Context management",
+  "curso": 1,
+  "escenario": null,
+  "stem": "Your skill's SKILL.md has grown to 1,900 lines, mostly large reference tables that only matter for rare edge cases. Following the open standard, what should you do?",
+  "opciones": [
+   "Split it into two skills with different names",
+   "Move the tables to <code>references/</code> files and link them from SKILL.md with an explicit \"only load when...\" condition",
+   "Raise the skill's model field so a larger model can handle the content",
+   "Compress the tables into shorter prose to fit under 500 lines"
+  ],
+  "correcta": "B",
+  "explicacion": "<b>B.</b> <b>Progressive disclosure</b>: SKILL.md &lt; 500 líneas como índice + <code>references/</code> con condición explícita \"Only load when…\". D pierde contenido; A fragmenta sin necesidad. No se recorta material: se decide CUÁNDO entra.",
+  "dificultad": null
+ },
+ {
+  "id": "quiz01-q06",
+  "origen": "quiz-01-agent-skills",
+  "tema": "contexto",
+  "subtema": "Context management",
+  "curso": 1,
+  "escenario": null,
+  "stem": "A skill includes a 300-line validation script in <code>scripts/</code>. What instruction should SKILL.md contain so the script stays context-efficient, and why?",
+  "opciones": [
+   "\"Read the script before running it\" — so Claude understands what it does",
+   "\"Run the script, not read it\" — execution only puts the script's output into context",
+   "\"Summarize the script\" — a summary is cheaper than the full file",
+   "\"Inline the script's logic into SKILL.md\" — instructions are cheaper than code"
+  ],
+  "correcta": "B",
+  "explicacion": "<b>B.</b> <i>\"Tell Claude to run the script, not read it\"</i> — al ejecutar, solo el <b>output</b> consume tokens (300 líneas de código → quizá 3 de salida). Además el código probado es determinista.",
+  "dificultad": null
+ },
+ {
+  "id": "quiz01-q07",
+  "origen": "quiz-01-agent-skills",
+  "tema": "skills",
+  "subtema": "Distribución",
+  "curso": 1,
+  "escenario": null,
+  "stem": "A financial company must guarantee that a security-review skill is applied consistently by every developer, and that no developer can override it with their own version. Which distribution method?",
+  "opciones": [
+   "Commit the skill to each team repository",
+   "Publish it as a plugin on an internal marketplace",
+   "Deploy it via enterprise managed settings",
+   "Email the skill folder to all developers to install personally"
+  ],
+  "correcta": "C",
+  "explicacion": "<b>C.</b> Keyword <b>\"must\"</b> + \"no developer can override\" = <b>enterprise managed settings</b>: prioridad máxima, pisa cualquier skill del mismo nombre. Repo (A) y plugin (B) quedan por debajo de Personal en prioridad.",
+  "dificultad": null
+ },
+ {
+  "id": "quiz01-q08",
+  "origen": "quiz-01-agent-skills",
+  "tema": "subagents",
+  "subtema": "Subagents",
+  "curso": 1,
+  "escenario": null,
+  "stem": "You create a custom subagent in <code>.claude/agents/reviewer.md</code> and expect it to use your <code>accessibility-audit</code> skill, but it never applies it. What is the most likely cause?",
+  "opciones": [
+   "The subagent's model field is set too low",
+   "Skills must be listed explicitly in the agent's <code>skills:</code> frontmatter field — subagents don't inherit skills",
+   "The skill needs allowed-tools to work inside subagents",
+   "Subagents can only use enterprise skills"
+  ],
+  "correcta": "B",
+  "explicacion": "<b>B.</b> El gotcha: los subagents <b>no heredan skills</b> — nacen con contexto limpio; hay que listarlas en <code>skills:</code>. Y recuerda: los built-in (Explore, Plan, Verify) no pueden usarlas en absoluto.",
+  "dificultad": null
+ },
+ {
+  "id": "quiz01-q09",
+  "origen": "quiz-01-agent-skills",
+  "tema": "troubleshooting",
+  "subtema": "Troubleshooting",
+  "curso": 1,
+  "escenario": null,
+  "stem": "A skill exists, passes the validator, and appears in the available skills list — but Claude never uses it when you ask in your usual way. Per the course, what is the cause \"almost always,\" and the fix?",
+  "opciones": [
+   "A priority conflict — rename the skill",
+   "The description lacks overlap with how you phrase requests — add real trigger phrases",
+   "A YAML syntax error — re-run the validator",
+   "The skill is too long — apply progressive disclosure"
+  ],
+  "correcta": "B",
+  "explicacion": "<b>B.</b> <i>\"The cause is almost always the description\"</i> — falta overlap semántico; agrega las frases que TÚ realmente usas y prueba variaciones (\"why is this slow?\", \"make this faster\").",
+  "dificultad": null
+ },
+ {
+  "id": "quiz01-q10",
+  "origen": "quiz-01-agent-skills",
+  "tema": "troubleshooting",
+  "subtema": "Troubleshooting",
+  "curso": 1,
+  "escenario": null,
+  "stem": "A skill loads fine but its script fails at runtime on Windows. Which pair of fixes does the course recommend?",
+  "opciones": [
+   "Rename SKILL.md to skill.md and restart",
+   "Move the script to assets/ and reference it from the description",
+   "Give scripts execute permission (chmod +x) and use forward slashes ( / ) in all paths",
+   "Reinstall Claude Code and clear the plugin cache"
+  ],
+  "correcta": "C",
+  "explicacion": "<b>C.</b> Runtime errors: <b>chmod +x</b> a los scripts + <b>forward slashes ( / ) incluso en Windows</b> (+ dependencias instaladas y anotadas en la description).",
+  "dificultad": null
+ }
+]

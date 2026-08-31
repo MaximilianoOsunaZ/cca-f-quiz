@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>CCA-F Quiz</title>
+  <meta name="description" content="Entrenamiento para la certificación Claude Certified Architect – Foundations">
+  <meta name="theme-color" content="#2C5BC7">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icons/icon-192.png">
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+
+  <!-- HOME -->
+  <section id="view-home" class="view active">
+    <div class="home-head">
+      <h1>CCA-F Quiz 🎓</h1>
+      <button class="iconbtn" data-nav="settings" aria-label="Ajustes">⚙️</button>
+    </div>
+    <div class="today">
+      <svg class="ring" viewBox="0 0 72 72" aria-hidden="true">
+        <circle class="bg" cx="36" cy="36" r="30" fill="none" stroke-width="7"></circle>
+        <circle class="fg" id="ring-fg" cx="36" cy="36" r="30" fill="none" stroke-width="7"
+                stroke-linecap="round" stroke-dasharray="188.5" stroke-dashoffset="188.5"
+                transform="rotate(-90 36 36)"></circle>
+        <text id="ring-text" x="36" y="41" text-anchor="middle">0/20</text>
+      </svg>
+      <div class="info">
+        <div class="big" id="today-title">Meta de hoy</div>
+        <div class="sub" id="today-sub">Responde preguntas para avanzar</div>
+      </div>
+      <div class="streak" id="streak">🔥 0</div>
+    </div>
+    <div class="modes">
+      <button class="modecard" data-mode="random">
+        <span class="emoji">🎲</span>
+        <span><span class="t">Feed infinito</span><br><span class="d">Preguntas y tarjetas al azar, sin fin</span></span>
+      </button>
+      <button class="modecard" id="btn-topics">
+        <span class="emoji">📂</span>
+        <span><span class="t">Por tema</span><br><span class="d">Elige un tema y practícalo a fondo</span></span>
+      </button>
+      <div class="topiclist" id="topiclist"></div>
+      <button class="modecard" data-mode="reincidentes">
+        <span class="emoji">🔁</span>
+        <span><span class="t">Reincidentes</span><br><span class="d">Las que más fallas, más seguido</span></span>
+        <span class="badge" id="badge-rein">0</span>
+      </button>
+      <button class="modecard" data-nav="dashboard">
+        <span class="emoji">📊</span>
+        <span><span class="t">Dashboard</span><br><span class="d">Tu fuerza por tema y progreso</span></span>
+      </button>
+    </div>
+  </section>
+
+  <!-- FEED -->
+  <section id="view-feed" class="view">
+    <div class="feedbar">
+      <span class="mode" id="feed-mode">FEED</span>
+      <span class="count" id="feed-count">hoy 0/20</span>
+      <button class="iconbtn" data-nav="home" aria-label="Salir">✕</button>
+    </div>
+    <div id="feed-item"></div>
+    <div class="nextwrap"><button class="nextbtn" id="btn-next" disabled>Siguiente →</button></div>
+  </section>
+
+  <!-- DASHBOARD -->
+  <section id="view-dashboard" class="view">
+    <button class="backbtn" data-nav="home">← Inicio</button>
+    <h2 style="margin-bottom:0.8rem">Tu progreso</h2>
+    <div class="statgrid" id="dash-stats"></div>
+    <h3 style="margin:0 0 0.5rem;font-size:0.95rem">Fuerza por tema</h3>
+    <div class="bars" id="dash-bars"></div>
+    <div class="panel"><h3>🔁 Top reincidentes</h3><div id="dash-rein"></div></div>
+    <div class="panel"><h3>🃏 Tarjetas por reforzar</h3><div id="dash-cards"></div></div>
+    <button class="primary" id="btn-copy">📋 Copiar para Claude</button>
+    <textarea class="copyout" id="copy-out" readonly aria-label="Resumen de progreso"></textarea>
+  </section>
+
+  <!-- AJUSTES -->
+  <section id="view-settings" class="view">
+    <button class="backbtn" data-nav="home">← Inicio</button>
+    <h2 style="margin-bottom:0.8rem">Ajustes</h2>
+    <div class="setrow"><span>Meta diaria (preguntas)</span>
+      <select id="set-meta"><option>10</option><option selected>20</option><option>30</option><option>50</option></select>
+    </div>
+    <div class="setrow"><span>Apariencia</span>
+      <select id="set-theme"><option value="auto">Auto</option><option value="light">Claro</option><option value="dark">Oscuro</option></select>
+    </div>
+    <div class="setrow"><span>Banco de preguntas</span><span class="muted" id="set-bank">—</span></div>
+    <button class="danger" id="btn-reset">Reiniciar todo mi progreso</button>
+    <p class="muted" style="margin-top:1rem">Tu progreso vive solo en este dispositivo. Usa "Copiar para Claude" en el Dashboard como respaldo ligero.</p>
+  </section>
+
+  <div class="toast" id="toast"></div>
+  <script src="./app.js"></script>
+</body>
+</html>
