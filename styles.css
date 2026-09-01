@@ -198,6 +198,43 @@ button:focus-visible { outline: 3px solid var(--amber); outline-offset: 2px; }
 .copyout { width: 100%; margin-top: 0.7rem; min-height: 140px; font-family: var(--mono); font-size: 0.75rem; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 10px; padding: 0.7rem; display: none; }
 .copyout.show { display: block; }
 
+/* ---------- Glosario ---------- */
+.glosbar { display: flex; gap: 0.45rem; flex-wrap: wrap; margin-bottom: 0.6rem; }
+.chip {
+  font-family: var(--mono); font-size: 0.78rem; background: var(--surface); color: var(--muted);
+  border: 1px solid var(--line); border-radius: 99px; padding: 0.35rem 0.85rem; min-height: 36px;
+}
+.chip.on { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.glossearch {
+  width: 100%; font-family: inherit; font-size: 0.95rem; background: var(--surface); color: var(--ink);
+  border: 1px solid var(--line); border-radius: 10px; padding: 0.65rem 0.9rem; margin-bottom: 0.4rem;
+}
+.gloscat { font-size: 0.9rem; margin: 1.2rem 0 0.55rem; color: var(--accent); }
+.glosgrid { display: grid; gap: 0.6rem; grid-template-columns: 1fr; }
+@media (min-width: 560px) { .glosgrid { grid-template-columns: 1fr 1fr; } }
+.flipcard {
+  position: relative; min-height: 11rem; perspective: 900px;
+  background: none; border: none; padding: 0; text-align: left; color: var(--ink); font-size: inherit;
+}
+.flipinner { position: absolute; inset: 0; display: block; transform-style: preserve-3d; transition: transform 0.45s; }
+.flipcard.flipped .flipinner { transform: rotateY(180deg); }
+.flipfront, .flipback {
+  position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden;
+  border-radius: 14px; padding: 0.9rem 1rem; display: flex; flex-direction: column;
+}
+.flipfront { background: var(--surface); border: 1.5px solid var(--line); align-items: flex-start; justify-content: center; gap: 0.5rem; }
+.fliptipo {
+  font-family: var(--mono); font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.09em;
+  color: var(--amber); background: var(--amber-soft); border-radius: 99px; padding: 0.14rem 0.6rem;
+}
+.flipterm { font-family: var(--display); font-weight: 700; font-size: 1.15rem; line-height: 1.25; overflow-wrap: anywhere; }
+.flipterm.mono { font-family: var(--mono); font-weight: 500; font-size: 1rem; }
+.fliphint { font-size: 0.72rem; color: var(--muted); }
+.flipback { background: var(--accent-soft); border: 1.5px solid var(--accent); transform: rotateY(180deg); overflow-y: auto; gap: 0.5rem; }
+.flipmean { font-size: 0.86rem; line-height: 1.45; }
+.flipfoot { margin-top: auto; font-family: var(--mono); font-size: 0.66rem; color: var(--muted); padding-top: 0.4rem; }
+@media (prefers-reduced-motion: reduce) { .flipinner { transition: none; } }
+
 /* ---------- Ajustes ---------- */
 .setrow { display: flex; justify-content: space-between; align-items: center; gap: 1rem; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 0.9rem 1rem; margin-bottom: 0.7rem; }
 .setrow select, .setrow input { font-family: inherit; font-size: 0.95rem; background: var(--ground); color: var(--ink); border: 1px solid var(--line); border-radius: 8px; padding: 0.45rem 0.6rem; }

@@ -52,6 +52,10 @@
         <span class="emoji">📊</span>
         <span><span class="t">Dashboard</span><br><span class="d">Tu fuerza por tema y progreso</span></span>
       </button>
+      <button class="modecard" data-nav="glosario">
+        <span class="emoji">📖</span>
+        <span><span class="t">Glosario</span><br><span class="d">Comandos y términos clave — toca la tarjeta para voltearla</span></span>
+      </button>
     </div>
   </section>
 
@@ -93,6 +97,21 @@
     <div class="setrow"><span>Banco de preguntas</span><span class="muted" id="set-bank">—</span></div>
     <button class="danger" id="btn-reset">Reiniciar todo mi progreso</button>
     <p class="muted" style="margin-top:1rem">Tu progreso vive solo en este dispositivo. Usa "Copiar para Claude" en el Dashboard como respaldo ligero.</p>
+  </section>
+
+  <!-- GLOSARIO -->
+  <section id="view-glosario" class="view">
+    <button class="backbtn" data-nav="home">← Inicio</button>
+    <h2 style="margin-bottom:0.3rem">Glosario 📖</h2>
+    <p class="muted" style="margin:0 0 0.8rem">Toca una tarjeta para voltearla y ver su significado.</p>
+    <div class="glosbar" id="glos-chips">
+      <button class="chip on" data-curso="all">Todos</button>
+      <button class="chip" data-curso="c1">Agent Skills</button>
+      <button class="chip" data-curso="c4">Claude Code in Action</button>
+      <button class="chip" data-curso="gen">Base</button>
+    </div>
+    <input type="search" class="glossearch" id="glos-search" placeholder="Busca un comando o término…" aria-label="Buscar en el glosario">
+    <div id="glos-list"></div>
   </section>
 
   <div class="toast" id="toast"></div>

@@ -1,6 +1,6 @@
 {
  "schemaVersion": 2,
- "bankVersion": "2026-08-31.2",
+ "bankVersion": "2026-09-01.3",
  "temas": {
   "mecanismos": {
    "nombre": "Elección de mecanismo",
@@ -3196,6 +3196,832 @@
    "titulo": "¿Qué le falta a Claude?",
    "cuerpo": "<b>Manos</b> (sistema externo) → MCP · <b>Espacio</b> (ensuciaría tu contexto) → Subagent · <b>Saber</b> → ¿siempre? CLAUDE.md / ¿a veces? Skill · <b>Nada, solo debe pasar</b> → Hook.<br>Chequeo de seguridad: ¿toleras que a veces NO pase? No → Hook, sin importar lo demás.",
    "origen": "apuntes-03"
+  }
+ ],
+ "glosario": [
+  {
+   "id": "g-001",
+   "curso": "c4",
+   "categoria": "Comandos de sesión y steering",
+   "tipo": "comando",
+   "termino": "/compact",
+   "significado": "Compacta la conversación: resume lo anterior para liberar context window. Se puede <b>dirigir</b>: <code>/compact conserva las decisiones de diseño</code> — dile qué NO debe perderse. Nunca toca archivos, solo contexto."
+  },
+  {
+   "id": "g-002",
+   "curso": "c4",
+   "categoria": "Comandos de sesión y steering",
+   "tipo": "concepto",
+   "termino": "checkpoint",
+   "significado": "Punto de restauración que Claude Code crea automáticamente <b>con cada prompt del usuario</b>. Son la base del rewind: siempre puedes volver a uno."
+  },
+  {
+   "id": "g-003",
+   "curso": "c4",
+   "categoria": "Comandos de sesión y steering",
+   "tipo": "comando",
+   "termino": "rewind (doble Esc)",
+   "significado": "Con el prompt vacío, presiona <code>Esc</code> dos veces: se abre el menú de rewind para elegir un checkpoint y una de sus 5 opciones. Ojo: solo revierte lo que Claude editó con SUS herramientas — no cambios manuales ni hechos vía bash."
+  },
+  {
+   "id": "g-004",
+   "curso": "c4",
+   "categoria": "Comandos de sesión y steering",
+   "tipo": "opción",
+   "termino": "Restore code and conversation",
+   "significado": "Opción 1 del menú rewind: vuelve TODO al checkpoint — los archivos Y la conversación. El reinicio completo. Además rewind bifurca (fork): la rama anterior no se destruye."
+  },
+  {
+   "id": "g-005",
+   "curso": "c4",
+   "categoria": "Comandos de sesión y steering",
+   "tipo": "opción",
+   "termino": "Restore conversation",
+   "significado": "Opción 2 del rewind: solo el chat vuelve atrás; el código en disco se queda como está. Útil para re-plantear la petición conservando el trabajo ya hecho."
+  },
+  {
+   "id": "g-006",
+   "curso": "c4",
+   "categoria": "Comandos de sesión y steering",
+   "tipo": "opción",
+   "termino": "Restore code",
+   "significado": "Opción 3 del rewind: solo los archivos vuelven al checkpoint; la conversación sigue intacta. Útil cuando el cambio salió mal pero el contexto acumulado sí sirve."
+  },
+  {
+   "id": "g-007",
+   "curso": "c4",
+   "categoria": "Comandos de sesión y steering",
+   "tipo": "opción",
+   "termino": "Summarize from here",
+   "significado": "Opción 4 del rewind: resume lo que vino DESPUÉS del checkpoint. Útil cuando hubo conversación lateral que ya no aporta — libera espacio."
+  },
+  {
+   "id": "g-008",
+   "curso": "c4",
+   "categoria": "Comandos de sesión y steering",
+   "tipo": "opción",
+   "termino": "Summarize up to here",
+   "significado": "Opción 5 del rewind: resume lo ANTERIOR al checkpoint. Útil para comprimir un setup largo y conservar intacto el detalle reciente (la implementación)."
+  },
+  {
+   "id": "g-009",
+   "curso": "c4",
+   "categoria": "Comandos de sesión y steering",
+   "tipo": "comando",
+   "termino": "/goal",
+   "significado": "Fija un objetivo que un evaluador revisa continuamente. Trampa de examen: el evaluador <b>solo lee el transcript</b> — no corre comandos ni ve archivos, así que el goal debe ser verificable en la conversación."
+  },
+  {
+   "id": "g-010",
+   "curso": "c4",
+   "categoria": "Comandos de sesión y steering",
+   "tipo": "comando",
+   "termino": "/goal clear",
+   "significado": "Quita el objetivo activo puesto con <code>/goal</code>."
+  },
+  {
+   "id": "g-011",
+   "curso": "c4",
+   "categoria": "Comandos de sesión y steering",
+   "tipo": "comando",
+   "termino": "/loop",
+   "significado": "Repite la tarea una y otra vez hasta que se cumpla una condición — pensado para esperar o reaccionar a <b>estado externo</b> (CI, un archivo, un servicio)."
+  },
+  {
+   "id": "g-012",
+   "curso": "c4",
+   "categoria": "Comandos de sesión y steering",
+   "tipo": "comando",
+   "termino": "Shift+Tab",
+   "significado": "Atajo del terminal para ciclar entre permission modes (Manual → Accept edits → Plan…) sin escribir comandos."
+  },
+  {
+   "id": "g-013",
+   "curso": "c4",
+   "categoria": "Comandos de sesión y steering",
+   "tipo": "concepto",
+   "termino": "worktree",
+   "significado": "Copia paralela del repo (git worktree) para correr varias sesiones de Claude a la vez sin que se pisen los archivos."
+  },
+  {
+   "id": "g-014",
+   "curso": "c4",
+   "categoria": "Comandos de sesión y steering",
+   "tipo": "archivo",
+   "termino": ".worktreeinclude",
+   "significado": "Lista los archivos NO versionados (p. ej. <code>.env</code>) que deben copiarse a cada worktree nuevo — sin esto, la sesión paralela arranca sin ellos."
+  },
+  {
+   "id": "g-015",
+   "curso": "c4",
+   "categoria": "Hooks: eventos",
+   "tipo": "evento",
+   "termino": "PreToolUse",
+   "significado": "Dispara ANTES de un tool call. ⭐ El primitivo de enforcement: el ÚNICO evento que detiene algo antes de que pase — y también puede reescribir el input con <code>updatedInput</code>."
+  },
+  {
+   "id": "g-016",
+   "curso": "c4",
+   "categoria": "Hooks: eventos",
+   "tipo": "evento",
+   "termino": "PostToolUse",
+   "significado": "Dispara después de un tool call EXITOSO. Bloquear aquí llega TARDE (la tool ya corrió), pero sirve para auto-format, lint y devolverle texto a Claude."
+  },
+  {
+   "id": "g-017",
+   "curso": "c4",
+   "categoria": "Hooks: eventos",
+   "tipo": "evento",
+   "termino": "Stop",
+   "significado": "Dispara cuando Claude quiere terminar su turno. Con exit 2 puedes negarte («no has terminado»): el gate de correctitud — p. ej. correr los tests y no dejarlo terminar si fallan."
+  },
+  {
+   "id": "g-018",
+   "curso": "c4",
+   "categoria": "Hooks: eventos",
+   "tipo": "evento",
+   "termino": "SubagentStop",
+   "significado": "Igual que Stop, pero cuando un subagent quiere terminar. El gate para el trabajo delegado."
+  },
+  {
+   "id": "g-019",
+   "curso": "c4",
+   "categoria": "Hooks: eventos",
+   "tipo": "evento",
+   "termino": "SessionStart",
+   "significado": "Dispara al arrancar la sesión. Con source <code>startup</code> = solo arranques frescos; con matcher <code>compact</code> corre tras una compactación y su stdout SE AGREGA al contexto — así se re-inyecta estado."
+  },
+  {
+   "id": "g-020",
+   "curso": "c4",
+   "categoria": "Hooks: eventos",
+   "tipo": "evento",
+   "termino": "UserPromptSubmit",
+   "significado": "Dispara cuando envías un prompt, antes de que Claude lo procese. Su stdout (con exit 0) se agrega al contexto."
+  },
+  {
+   "id": "g-021",
+   "curso": "c4",
+   "categoria": "Hooks: eventos",
+   "tipo": "evento",
+   "termino": "PreCompact",
+   "significado": "Dispara justo ANTES de una compactación."
+  },
+  {
+   "id": "g-022",
+   "curso": "c4",
+   "categoria": "Hooks: eventos",
+   "tipo": "evento",
+   "termino": "PostCompact",
+   "significado": "Dispara DESPUÉS de compactar. 🪤 Trampa oficial del curso: para re-inyectar contexto tras el compact NO uses PostCompact — usa SessionStart con matcher <code>compact</code>, que es el que devuelve su output a la conversación."
+  },
+  {
+   "id": "g-023",
+   "curso": "c4",
+   "categoria": "Hooks: eventos",
+   "tipo": "evento",
+   "termino": "InstructionsLoaded",
+   "significado": "Dispara al cargarse un CLAUDE.md o rule file — sirve para auditar qué entró realmente al contexto."
+  },
+  {
+   "id": "g-024",
+   "curso": "c4",
+   "categoria": "Hooks: eventos",
+   "tipo": "concepto",
+   "termino": "matcher",
+   "significado": "Filtro en la configuración del hook que decide cuándo aplica: qué herramienta (p. ej. solo Bash en PreToolUse) o qué source (p. ej. <code>compact</code> en SessionStart)."
+  },
+  {
+   "id": "g-025",
+   "curso": "c4",
+   "categoria": "Hooks: salidas y decisiones",
+   "tipo": "salida",
+   "termino": "exit 0",
+   "significado": "Éxito. Si stdout es JSON, se parsea (p. ej. <code>permissionDecision</code>). Texto plano se ignora EXCEPTO en SessionStart y UserPromptSubmit, donde SE AGREGA al contexto."
+  },
+  {
+   "id": "g-026",
+   "curso": "c4",
+   "categoria": "Hooks: salidas y decisiones",
+   "tipo": "salida",
+   "termino": "exit 1",
+   "significado": "🪤 LA trampa del examen: exit 1 NO bloquea nada. Se siente como error, pero solo se loguea y Claude sigue. Para detener una acción es exit 2, no 1."
+  },
+  {
+   "id": "g-027",
+   "curso": "c4",
+   "categoria": "Hooks: salidas y decisiones",
+   "tipo": "salida",
+   "termino": "exit 2",
+   "significado": "Error BLOQUEANTE: detiene la acción y stderr se le entrega a Claude como contexto para que corrija. Puede incluso bloquear Stop («no has terminado»). Notification y SessionStart lo ignoran."
+  },
+  {
+   "id": "g-028",
+   "curso": "c4",
+   "categoria": "Hooks: salidas y decisiones",
+   "tipo": "campo",
+   "termino": "permissionDecision",
+   "significado": "Campo del JSON que imprime un PreToolUse (con exit 0) para decidir la suerte del tool call: allow, deny o ask."
+  },
+  {
+   "id": "g-029",
+   "curso": "c4",
+   "categoria": "Hooks: salidas y decisiones",
+   "tipo": "opción",
+   "termino": "allow · deny · ask",
+   "significado": "Los 3 valores de <code>permissionDecision</code>: allow deja pasar sin preguntar · deny bloquea · ask se lo pasa al usuario para que decida."
+  },
+  {
+   "id": "g-030",
+   "curso": "c4",
+   "categoria": "Hooks: salidas y decisiones",
+   "tipo": "opción",
+   "termino": "defer",
+   "significado": "El cuarto valor (raro) de <code>permissionDecision</code>: solo aplica en corridas no interactivas (<code>-p</code>)."
+  },
+  {
+   "id": "g-031",
+   "curso": "c4",
+   "categoria": "Hooks: salidas y decisiones",
+   "tipo": "campo",
+   "termino": "updatedInput",
+   "significado": "En vez de bloquear, REESCRIBE el tool call (p. ej. redactar un secreto y dejar que el comando corra). 🪤 Catch: reemplaza el input COMPLETO — devuelve también los campos que no cambias, o se pierden."
+  },
+  {
+   "id": "g-032",
+   "curso": "c4",
+   "categoria": "Hooks: salidas y decisiones",
+   "tipo": "concepto",
+   "termino": "hooks en settings.json",
+   "significado": "Dónde viven los hooks: <code>.claude/settings.json</code> (proyecto) o <code>~/.claude/settings.json</code> (personal), organizados por evento, con matchers y el comando a ejecutar."
+  },
+  {
+   "id": "g-033",
+   "curso": "c4",
+   "categoria": "Permission modes",
+   "tipo": "modo",
+   "termino": "Manual",
+   "significado": "El default: Claude pregunta antes de cada acción riesgosa (editar archivos, correr comandos). Máximo control, máxima fricción."
+  },
+  {
+   "id": "g-034",
+   "curso": "c4",
+   "categoria": "Permission modes",
+   "tipo": "modo",
+   "termino": "Accept edits",
+   "significado": "Auto-acepta las EDICIONES de archivos; sigue preguntando por comandos y acciones más delicadas."
+  },
+  {
+   "id": "g-035",
+   "curso": "c4",
+   "categoria": "Permission modes",
+   "tipo": "modo",
+   "termino": "Plan",
+   "significado": "Claude solo lee, investiga y te propone un plan; no edita nada hasta que lo apruebes. El hábito nº 1 para tareas largas: scope the work first."
+  },
+  {
+   "id": "g-036",
+   "curso": "c4",
+   "categoria": "Permission modes",
+   "tipo": "modo",
+   "termino": "Auto",
+   "significado": "Un clasificador evalúa cada acción y aprueba las que parecen seguras. ⭐ Guarda INTENCIÓN, no corrección: puede bloquear una acción legítima que «parece» riesgosa (p. ej. un curl con Bearer token)."
+  },
+  {
+   "id": "g-037",
+   "curso": "c4",
+   "categoria": "Permission modes",
+   "tipo": "modo",
+   "termino": "Don't ask",
+   "significado": "Nunca pregunta: lo que necesitaría permiso se AUTO-DENIEGA en vez de colgarse esperando a un humano. El modo para pipelines desatendidos."
+  },
+  {
+   "id": "g-038",
+   "curso": "c4",
+   "categoria": "Permission modes",
+   "tipo": "modo",
+   "termino": "Bypass permissions",
+   "significado": "Todo se aprueba sin revisar. SOLO aceptable dentro de un contenedor o VM aislado y desechable — nunca en tu máquina real."
+  },
+  {
+   "id": "g-039",
+   "curso": "c4",
+   "categoria": "Permission modes",
+   "tipo": "concepto",
+   "termino": "el clasificador",
+   "significado": "El modelo que en modo Auto revisa cada acción y decide si la aprueba. Evalúa si la acción coincide con tu INTENCIÓN declarada — no si el código es correcto."
+  },
+  {
+   "id": "g-040",
+   "curso": "c4",
+   "categoria": "Headless y automatización",
+   "tipo": "flag",
+   "termino": "claude -p (--print)",
+   "significado": "Modo headless: corre el prompt, imprime la respuesta y termina — Claude Code como un comando más del shell, pipeable. ⚠️ NO salta el auto-discovery (eso es <code>--bare</code>)."
+  },
+  {
+   "id": "g-041",
+   "curso": "c4",
+   "categoria": "Headless y automatización",
+   "tipo": "flag",
+   "termino": "--bare",
+   "significado": "Arranca SIN auto-discovery: ni CLAUDE.md, ni skills, ni hooks, ni MCP… Sesión limpia y determinista para CI. Receta para scripts: <code>claude --bare -p \"...\"</code>."
+  },
+  {
+   "id": "g-042",
+   "curso": "c4",
+   "categoria": "Headless y automatización",
+   "tipo": "flag",
+   "termino": "--output-format json",
+   "significado": "La salida es un objeto JSON con metadata (session_id, costo, turnos) en vez de texto plano — lo que un script puede consumir."
+  },
+  {
+   "id": "g-043",
+   "curso": "c4",
+   "categoria": "Headless y automatización",
+   "tipo": "flag",
+   "termino": "--json-schema",
+   "significado": "Le pasas un JSON Schema y Claude restringe su respuesta a esa forma; el objeto validado cae en el campo <code>structured_output</code>."
+  },
+  {
+   "id": "g-044",
+   "curso": "c4",
+   "categoria": "Headless y automatización",
+   "tipo": "campo",
+   "termino": "structured_output",
+   "significado": "El campo de la respuesta JSON donde llega el objeto conforme a tu <code>--json-schema</code>: <code>| jq '.structured_output'</code> y directo a tu base de datos u otro script."
+  },
+  {
+   "id": "g-045",
+   "curso": "c4",
+   "categoria": "Headless y automatización",
+   "tipo": "campo",
+   "termino": "session_id",
+   "significado": "Identificador de sesión que viene en el output JSON. Guárdalo: es la llave para que otro script retome la conversación con el contexto completo."
+  },
+  {
+   "id": "g-046",
+   "curso": "c4",
+   "categoria": "Headless y automatización",
+   "tipo": "comando",
+   "termino": "claude --resume",
+   "significado": "Retoma una sesión anterior con todo su contexto: <code>claude --resume \"$(jq -r .session_id plan.json)\"</code> — un script planea, otro ejecuta."
+  },
+  {
+   "id": "g-047",
+   "curso": "c4",
+   "categoria": "Headless y automatización",
+   "tipo": "flag",
+   "termino": "--max-turns",
+   "significado": "Tope duro de turnos del loop agéntico — el freno de costo y seguridad nº 1 en CI (va dentro de <code>claude_args</code>)."
+  },
+  {
+   "id": "g-048",
+   "curso": "c4",
+   "categoria": "Headless y automatización",
+   "tipo": "concepto",
+   "termino": "routine",
+   "significado": "Automatización que corre en la infraestructura de Anthropic (no construyes nada): se dispara por schedule, webhook o eventos de GitHub, corre máximo cada hora, clona fresco el default branch y solo pushea a ramas <code>claude/</code>."
+  },
+  {
+   "id": "g-049",
+   "curso": "c4",
+   "categoria": "Headless y automatización",
+   "tipo": "comando",
+   "termino": "/schedule",
+   "significado": "Crea routines desde el terminal en lenguaje natural: <code>/schedule daily dependency audit at 9am</code>. (La otra vía: claude.ai/code/routines.)"
+  },
+  {
+   "id": "g-050",
+   "curso": "c4",
+   "categoria": "Headless y automatización",
+   "tipo": "concepto",
+   "termino": "ramas claude/",
+   "significado": "El guardrail de routines: cada corrida solo puede pushear a ramas con prefijo <code>claude/</code> — una corrida autónoma jamás reescribe main; tú revisas con un PR."
+  },
+  {
+   "id": "g-051",
+   "curso": "c4",
+   "categoria": "Headless y automatización",
+   "tipo": "concepto",
+   "termino": "Agent SDK",
+   "significado": "La librería (TypeScript/Python) para embeber el motor de Claude Code dentro de tu propio producto — el extremo de máximo control del espectro de automatización."
+  },
+  {
+   "id": "g-052",
+   "curso": "c4",
+   "categoria": "Headless y automatización",
+   "tipo": "comando",
+   "termino": "query()",
+   "significado": "La función principal del Agent SDK: le das prompt y opciones, corre el loop agéntico y te va entregando los mensajes del agente."
+  },
+  {
+   "id": "g-053",
+   "curso": "c4",
+   "categoria": "Headless y automatización",
+   "tipo": "concepto",
+   "termino": "espectro de control",
+   "significado": "Routines (cero infraestructura) → <code>-p</code> (tu pipeline) → <code>--bare</code> (CI determinista) → Agent SDK (tu producto). «Start with routines. Drop down the spectrum only when the job actually needs the extra control.»"
+  },
+  {
+   "id": "g-054",
+   "curso": "c4",
+   "categoria": "GitHub y Code Review",
+   "tipo": "comando",
+   "termino": "/install-github-app",
+   "significado": "El camino guiado para conectar Claude con tu repo: instala la GitHub App y genera los workflows."
+  },
+  {
+   "id": "g-055",
+   "curso": "c4",
+   "categoria": "GitHub y Code Review",
+   "tipo": "concepto",
+   "termino": "claude-code-action@v1",
+   "significado": "El action DIY (<code>anthropics/claude-code-action@v1</code>): Claude responde a @claude en issues/PRs o corre por cron/workflow_dispatch; se configura con <code>claude_args</code>."
+  },
+  {
+   "id": "g-056",
+   "curso": "c4",
+   "categoria": "GitHub y Code Review",
+   "tipo": "campo",
+   "termino": "trigger_phrase",
+   "significado": "Input del action: la frase que lo activa en comentarios. Default: <code>@claude</code>."
+  },
+  {
+   "id": "g-057",
+   "curso": "c4",
+   "categoria": "GitHub y Code Review",
+   "tipo": "campo",
+   "termino": "anthropic_api_key",
+   "significado": "Input del action para autenticar. ⭐ Es CONDICIONAL: solo se necesita con la API directa de Claude — con Bedrock, Vertex u OIDC no se usa."
+  },
+  {
+   "id": "g-058",
+   "curso": "c4",
+   "categoria": "GitHub y Code Review",
+   "tipo": "campo",
+   "termino": "claude_args",
+   "significado": "Input del action: string de argumentos CLI que van directo a Claude Code (p. ej. <code>--max-turns 5</code>, modo sin preguntas, tools mínimas)."
+  },
+  {
+   "id": "g-059",
+   "curso": "c4",
+   "categoria": "GitHub y Code Review",
+   "tipo": "concepto",
+   "termino": "Code Review administrado",
+   "significado": "El reviewer oficial de Anthropic para PRs: SOLO SEÑALA problemas — nunca aprueba, nunca bloquea el merge y no aplica arreglos."
+  },
+  {
+   "id": "g-060",
+   "curso": "c4",
+   "categoria": "GitHub y Code Review",
+   "tipo": "comando",
+   "termino": "/code-review",
+   "significado": "Corre la revisión de Claude LOCALMENTE sobre tu rama, antes de abrir el PR."
+  },
+  {
+   "id": "g-061",
+   "curso": "c4",
+   "categoria": "GitHub y Code Review",
+   "tipo": "comando",
+   "termino": "/code-review --fix",
+   "significado": "La revisión local que ADEMÁS aplica los arreglos — lo que el Code Review administrado nunca hace."
+  },
+  {
+   "id": "g-062",
+   "curso": "c4",
+   "categoria": "GitHub y Code Review",
+   "tipo": "campo",
+   "termino": "use_bedrock / use_vertex",
+   "significado": "Inputs del action para autenticar vía AWS Bedrock o Google Vertex AI en vez de la API directa (y entonces <code>anthropic_api_key</code> sobra)."
+  },
+  {
+   "id": "g-063",
+   "curso": "c4",
+   "categoria": "GitHub y Code Review",
+   "tipo": "evento",
+   "termino": "workflow_dispatch",
+   "significado": "Trigger de GitHub Actions para disparar el workflow a mano desde la pestaña Actions (o por API) — Claude sin necesidad de un comentario."
+  },
+  {
+   "id": "g-064",
+   "curso": "c1",
+   "categoria": "Skills: anatomía",
+   "tipo": "concepto",
+   "termino": "skill",
+   "significado": "Un directorio con un SKILL.md que le enseña a Claude un conocimiento o procedimiento UNA sola vez. Se activa sola cuando tu petición coincide semánticamente con su description."
+  },
+  {
+   "id": "g-065",
+   "curso": "c1",
+   "categoria": "Skills: anatomía",
+   "tipo": "archivo",
+   "termino": "SKILL.md",
+   "significado": "El corazón de la skill: frontmatter YAML arriba + instrucciones Markdown abajo. Debe llamarse EXACTAMENTE así y el directorio debe llamarse como el name. Tras editar: reiniciar Claude Code para recargar."
+  },
+  {
+   "id": "g-066",
+   "curso": "c1",
+   "categoria": "Skills: anatomía",
+   "tipo": "concepto",
+   "termino": "frontmatter",
+   "significado": "El bloque YAML entre <code>---</code> al inicio del SKILL.md. Contiene la metadata: name, description y los opcionales (allowed-tools, model)."
+  },
+  {
+   "id": "g-067",
+   "curso": "c1",
+   "categoria": "Skills: anatomía",
+   "tipo": "concepto",
+   "termino": "metadata",
+   "significado": "La parte de la skill SIEMPRE cargada en contexto (name + description) — el nivel 1 del progressive disclosure. Por eso la description es el criterio de activación."
+  },
+  {
+   "id": "g-068",
+   "curso": "c1",
+   "categoria": "Skills: anatomía",
+   "tipo": "campo",
+   "termino": "name",
+   "significado": "Nombre de la skill: máximo 64 caracteres y debe coincidir con el nombre del directorio."
+  },
+  {
+   "id": "g-069",
+   "curso": "c1",
+   "categoria": "Skills: anatomía",
+   "tipo": "campo",
+   "termino": "description",
+   "significado": "Máximo 1,024 caracteres. Contra ella se hace el matching semántico: escribe QUÉ hace y CUÁNDO usarla, con trigger phrases concretas."
+  },
+  {
+   "id": "g-070",
+   "curso": "c1",
+   "categoria": "Skills: anatomía",
+   "tipo": "concepto",
+   "termino": "semantic matching",
+   "significado": "Cómo se activa una skill: Claude compara el SIGNIFICADO de tu petición con las descriptions disponibles — no busca palabras exactas."
+  },
+  {
+   "id": "g-071",
+   "curso": "c1",
+   "categoria": "Skills: anatomía",
+   "tipo": "campo",
+   "termino": "allowed-tools",
+   "significado": "Campo opcional del frontmatter: lista blanca de herramientas mientras la skill está activa. Omitirlo = sin restricción."
+  },
+  {
+   "id": "g-072",
+   "curso": "c1",
+   "categoria": "Skills: anatomía",
+   "tipo": "campo",
+   "termino": "model",
+   "significado": "Campo opcional del frontmatter: qué modelo ejecuta la skill (forzar uno más capaz, o uno más barato)."
+  },
+  {
+   "id": "g-073",
+   "curso": "c1",
+   "categoria": "Skills: anatomía",
+   "tipo": "concepto",
+   "termino": "64 · 1,024 · ~500",
+   "significado": "Los tres números de examen: name ≤ 64 chars · description ≤ 1,024 chars · SKILL.md recomendado bajo ~500 líneas (lo demás va a references/)."
+  },
+  {
+   "id": "g-074",
+   "curso": "c1",
+   "categoria": "Progressive disclosure",
+   "tipo": "concepto",
+   "termino": "progressive disclosure",
+   "significado": "Cargar información solo cuando hace falta, en 3 niveles: metadata (siempre) → instrucciones (al activarse) → recursos (solo si la tarea lo pide). Así una skill enorme casi no cuesta contexto."
+  },
+  {
+   "id": "g-075",
+   "curso": "c1",
+   "categoria": "Progressive disclosure",
+   "tipo": "archivo",
+   "termino": "references/",
+   "significado": "Documentos que Claude LEE cuando la tarea lo requiere — entran al contexto solo entonces (nivel 3)."
+  },
+  {
+   "id": "g-076",
+   "curso": "c1",
+   "categoria": "Progressive disclosure",
+   "tipo": "archivo",
+   "termino": "scripts/",
+   "significado": "Código que Claude EJECUTA sin leerlo: solo el output ocupa contexto. «Run the script, not read it.»"
+  },
+  {
+   "id": "g-077",
+   "curso": "c1",
+   "categoria": "Progressive disclosure",
+   "tipo": "archivo",
+   "termino": "assets/",
+   "significado": "Archivos que Claude USA tal cual (plantillas, fuentes, logos) — ni se leen ni se ejecutan."
+  },
+  {
+   "id": "g-078",
+   "curso": "c1",
+   "categoria": "Progressive disclosure",
+   "tipo": "concepto",
+   "termino": "context window",
+   "significado": "La memoria de trabajo de Claude, medida en tokens. Todo lo cargado compite por atención — la razón de ser del progressive disclosure y de los CLAUDE.md flacos."
+  },
+  {
+   "id": "g-079",
+   "curso": "c1",
+   "categoria": "Progressive disclosure",
+   "tipo": "concepto",
+   "termino": "«run, don't read»",
+   "significado": "La regla de scripts/: ejecutar cuesta solo el output; leer costaría el archivo entero. Elige la carpeta según CÓMO se consume el recurso: leer → references/, ejecutar → scripts/, usar → assets/."
+  },
+  {
+   "id": "g-080",
+   "curso": "c1",
+   "categoria": "Prioridad y distribución",
+   "tipo": "concepto",
+   "termino": "E-P-P-P",
+   "significado": "El orden cuando dos skills se llaman igual: Enterprise → Personal → Project → Plugins. Solo la ganadora se carga. Ojo de examen: Personal le gana a Project."
+  },
+  {
+   "id": "g-081",
+   "curso": "c1",
+   "categoria": "Prioridad y distribución",
+   "tipo": "concepto",
+   "termino": "shadowing",
+   "significado": "Una skill «tapa» a otra del mismo nombre con menor prioridad (tu personal tapa a la del proyecto). Arreglo: nombres descriptivos / renombrar."
+  },
+  {
+   "id": "g-082",
+   "curso": "c1",
+   "categoria": "Prioridad y distribución",
+   "tipo": "concepto",
+   "termino": "enterprise managed settings",
+   "significado": "Skills que la organización distribuye como OBLIGATORIAS (keyword del curso: «must»). Máxima prioridad — nadie las puede tapar."
+  },
+  {
+   "id": "g-083",
+   "curso": "c1",
+   "categoria": "Prioridad y distribución",
+   "tipo": "concepto",
+   "termino": "personal vs project",
+   "significado": "Personal (<code>~/.claude/skills</code>) te sigue a TODOS tus proyectos; project (<code>.claude/skills</code>) vive en el repo y viaja al equipo con git."
+  },
+  {
+   "id": "g-084",
+   "curso": "c1",
+   "categoria": "Prioridad y distribución",
+   "tipo": "concepto",
+   "termino": "plugin",
+   "significado": "Unidad instalable que agrupa skills + agents + hooks + MCP. Corre con TUS privilegios; sus hooks se APILAN con los tuyos; su clave agent puede tomar el hilo principal."
+  },
+  {
+   "id": "g-085",
+   "curso": "c1",
+   "categoria": "Prioridad y distribución",
+   "tipo": "concepto",
+   "termino": "marketplace",
+   "significado": "Catálogo (un repo git) desde el que instalas plugins. «Reviewed ≠ trusted»: read before you install."
+  },
+  {
+   "id": "g-086",
+   "curso": "c1",
+   "categoria": "Prioridad y distribución",
+   "tipo": "archivo",
+   "termino": "plugin.json",
+   "significado": "El manifest del plugin: nombre, versión y qué componentes trae."
+  },
+  {
+   "id": "g-087",
+   "curso": "c1",
+   "categoria": "Prioridad y distribución",
+   "tipo": "comando",
+   "termino": "/plugin marketplace add",
+   "significado": "Registra un marketplace (repo) para poder instalar sus plugins."
+  },
+  {
+   "id": "g-088",
+   "curso": "c1",
+   "categoria": "Prioridad y distribución",
+   "tipo": "comando",
+   "termino": "/plugin install",
+   "significado": "Instala un plugin desde un marketplace ya agregado."
+  },
+  {
+   "id": "g-089",
+   "curso": "c1",
+   "categoria": "Subagents y diagnóstico",
+   "tipo": "concepto",
+   "termino": "subagent",
+   "significado": "Otro Claude con contexto PROPIO: recibe una tarea, trabaja aparte y devuelve solo el resultado — tu contexto no se ensucia con los pasos intermedios."
+  },
+  {
+   "id": "g-090",
+   "curso": "c1",
+   "categoria": "Subagents y diagnóstico",
+   "tipo": "concepto",
+   "termino": "built-in vs custom",
+   "significado": "Los built-in (Explore, Plan…) vienen precargados y NO pueden usar skills jamás; los custom los defines tú y usan SOLO las skills que les listes."
+  },
+  {
+   "id": "g-091",
+   "curso": "c1",
+   "categoria": "Subagents y diagnóstico",
+   "tipo": "campo",
+   "termino": "skills:",
+   "significado": "En un subagent custom, la lista de skills que puede usar. 🪤 «Inherits» = trampa: NO hereda nada — si no está listada, no existe para él; y las listadas cargan COMPLETAS al arrancar."
+  },
+  {
+   "id": "g-092",
+   "curso": "c1",
+   "categoria": "Subagents y diagnóstico",
+   "tipo": "comando",
+   "termino": "/agents",
+   "significado": "Crea y gestiona subagents custom desde dentro de Claude Code."
+  },
+  {
+   "id": "g-093",
+   "curso": "c1",
+   "categoria": "Subagents y diagnóstico",
+   "tipo": "comando",
+   "termino": "claude --debug",
+   "significado": "Arranca con log de diagnóstico: muestra qué skills se descubren y por qué una no carga (nombre del directorio, SKILL.md mal escrito…)."
+  },
+  {
+   "id": "g-094",
+   "curso": "c1",
+   "categoria": "Subagents y diagnóstico",
+   "tipo": "concepto",
+   "termino": "skills validator",
+   "significado": "La herramienta que valida la estructura de una skill (frontmatter, límites, nombres). SIEMPRE el primer paso del troubleshooting."
+  },
+  {
+   "id": "g-095",
+   "curso": "c1",
+   "categoria": "Subagents y diagnóstico",
+   "tipo": "concepto",
+   "termino": "uv",
+   "significado": "Gestor de paquetes y entornos de Python con el que corren los scripts de skills que traen dependencias."
+  },
+  {
+   "id": "g-096",
+   "curso": "gen",
+   "categoria": "Conceptos base",
+   "tipo": "archivo",
+   "termino": "CLAUDE.md",
+   "significado": "Instrucciones que Claude carga SIEMPRE al arrancar en el proyecto. Es guidance, no enforcement: cada línea compite por atención — archivo flaco se cumple más. Hard rules → hooks."
+  },
+  {
+   "id": "g-097",
+   "curso": "gen",
+   "categoria": "Conceptos base",
+   "tipo": "archivo",
+   "termino": "CLAUDE.local.md",
+   "significado": "Tu CLAUDE.md personal del proyecto (no se versiona). Los 4 archivos — managed, user, project, local — SE APILAN al arrancar (a diferencia de skills, donde solo gana una)."
+  },
+  {
+   "id": "g-098",
+   "curso": "gen",
+   "categoria": "Conceptos base",
+   "tipo": "concepto",
+   "termino": "imports (@ruta)",
+   "significado": "Dentro de CLAUDE.md, <code>@ruta/archivo.md</code> inserta otro archivo. Organizan, pero NO ahorran contexto: se expanden completos al cargar."
+  },
+  {
+   "id": "g-099",
+   "curso": "gen",
+   "categoria": "Conceptos base",
+   "tipo": "concepto",
+   "termino": "hook",
+   "significado": "Script tuyo que corre automáticamente en un punto exacto del loop de Claude. Determinista: SIEMPRE corre — convierte una regla que Claude «suele seguir» en una que no puede saltarse."
+  },
+  {
+   "id": "g-100",
+   "curso": "gen",
+   "categoria": "Conceptos base",
+   "tipo": "concepto",
+   "termino": "MCP",
+   "significado": "Model Context Protocol: el estándar para conectar Claude con sistemas EXTERNOS (APIs, bases de datos, apps) mediante servers que exponen tools. En la escalera de decisión: ¿falta acceso externo? → MCP."
+  },
+  {
+   "id": "g-101",
+   "curso": "gen",
+   "categoria": "Conceptos base",
+   "tipo": "concepto",
+   "termino": "API",
+   "significado": "Interfaz para pedirle cosas a un servicio por HTTP: mandas un request (JSON) y regresa un response. La Claude API es cómo los programas hablan con Claude — la base de tu siguiente curso."
+  },
+  {
+   "id": "g-102",
+   "curso": "gen",
+   "categoria": "Conceptos base",
+   "tipo": "concepto",
+   "termino": "SDK",
+   "significado": "Librería que envuelve una API en tu lenguaje: arma los requests por ti. (El Agent SDK es un SDK específico: embebe el loop agéntico completo de Claude Code.)"
+  },
+  {
+   "id": "g-103",
+   "curso": "gen",
+   "categoria": "Conceptos base",
+   "tipo": "concepto",
+   "termino": "token",
+   "significado": "La unidad en que Claude mide el texto (~¾ de una palabra en inglés). Se cobra por tokens de entrada y salida, y el context window se mide en tokens."
   }
  ]
 }

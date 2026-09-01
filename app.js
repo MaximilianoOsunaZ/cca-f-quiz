@@ -356,12 +356,57 @@ function buildCopyText() {
   return lines.join("\n");
 }
 
+// ---------- Glosario ----------
+const glos = { curso: "all", q: "" };
+const GLOS_CURSO = { c1: "Agent Skills", c4: "Claude Code in Action", gen: "Base" };
+const GLOS_MONO = new Set(["comando", "flag", "evento", "campo", "salida"]);
+const norm = (s) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+function renderGlosario() {
+  const host = document.getElementById("glos-list");
+  const entries = (BANK.glosario || []).filter((g) => {
+    if (glos.curso !== "all" && g.curso !== glos.curso) return false;
+    if (glos.q && !norm(g.termino + " " + g.significado + " " + g.categoria).includes(norm(glos.q))) return false;
+    return true;
+  });
+  if (!entries.length) {
+    host.innerHTML = `<p class="muted" style="text-align:center;padding:1.5rem 0">Nada coincide con tu búsqueda.</p>`;
+    return;
+  }
+  // agrupa por categoría preservando el orden del banco
+  const cats = [], byCat = new Map();
+  for (const g of entries) {
+    if (!byCat.has(g.categoria)) { byCat.set(g.categoria, []); cats.push(g.categoria); }
+    byCat.get(g.categoria).push(g);
+  }
+  host.innerHTML = cats.map((cat) => `
+    <h3 class="gloscat">${cat} <span class="muted">· ${byCat.get(cat).length}</span></h3>
+    <div class="glosgrid">${byCat.get(cat).map((g) => `
+      <button class="flipcard" data-id="${g.id}" aria-expanded="false">
+        <span class="flipinner">
+          <span class="flipfront">
+            <span class="fliptipo">${g.tipo}</span>
+            <span class="flipterm${GLOS_MONO.has(g.tipo) ? " mono" : ""}">${g.termino}</span>
+            <span class="fliphint">toca para voltear ↻</span>
+          </span>
+          <span class="flipback">
+            <span class="flipmean">${g.significado}</span>
+            <span class="flipfoot">${cat} · ${GLOS_CURSO[g.curso]}</span>
+          </span>
+        </span>
+      </button>`).join("")}
+    </div>`).join("");
+  host.querySelectorAll(".flipcard").forEach((b) => b.addEventListener("click", () => {
+    b.setAttribute("aria-expanded", String(b.classList.toggle("flipped")));
+  }));
+}
+
 // ---------- Navegación / UI ----------
 function nav(view) {
   document.querySelectorAll(".view").forEach((v) => v.classList.remove("active"));
   document.getElementById("view-" + view).classList.add("active");
   if (view === "home") renderHome();
   if (view === "dashboard") renderDashboard();
+  if (view === "glosario") renderGlosario();
   window.scrollTo({ top: 0 });
 }
 let toastT = null;
@@ -399,6 +444,15 @@ async function init() {
   document.getElementById("btn-next").addEventListener("click", nextItem);
   document.getElementById("btn-lang").addEventListener("click", toggleLang);
   updateLangBtn();
+  document.querySelectorAll("#glos-chips .chip").forEach((b) => b.addEventListener("click", () => {
+    glos.curso = b.dataset.curso;
+    document.querySelectorAll("#glos-chips .chip").forEach((x) => x.classList.toggle("on", x === b));
+    renderGlosario();
+  }));
+  document.getElementById("glos-search").addEventListener("input", (e) => {
+    glos.q = e.target.value.trim();
+    renderGlosario();
+  });
   document.getElementById("btn-copy").addEventListener("click", async () => {
     const text = buildCopyText();
     const out = document.getElementById("copy-out");
@@ -412,7 +466,7 @@ async function init() {
   const themeSel = document.getElementById("set-theme");
   themeSel.value = S.settings.apariencia;
   themeSel.addEventListener("change", () => { S.settings.apariencia = themeSel.value; save(); applyTheme(); });
-  document.getElementById("set-bank").textContent = `v${BANK.bankVersion} · ${BANK.preguntas.length}p + ${BANK.tarjetas.length}t`;
+  document.getElementById("set-bank").textContent = `v${BANK.bankVersion} · ${BANK.preguntas.length}p + ${BANK.tarjetas.length}t + ${(BANK.glosario || []).length}g`;
   document.getElementById("btn-reset").addEventListener("click", () => {
     if (confirm("¿Borrar TODO tu progreso? Esto no se puede deshacer.") && confirm("¿Seguro seguro? Considera copiar tu progreso primero.")) {
       S = freshState(); save(); applyTheme(); renderHome(); toast("Progreso reiniciado");

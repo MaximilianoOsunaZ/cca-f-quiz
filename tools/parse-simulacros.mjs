@@ -173,26 +173,37 @@ for (const q of manualQ) {
 }
 for (const c of cards) if (!(c.tema in TEMAS)) fail(`card ${c.id}: tema desconocido "${c.tema}"`);
 
+// Glosario (tarjetas volteables)
+const glosario = JSON.parse(readFileSync(resolve(APP, "data", "glosario.json"), "utf8"));
+const TIPOS_GLOS = new Set(["comando", "evento", "opción", "flag", "concepto", "campo", "archivo", "salida", "modo"]);
+for (const g of glosario) {
+  if (!["c1", "c4", "gen"].includes(g.curso)) fail(`glosario ${g.id}: curso inválido "${g.curso}"`);
+  if (!TIPOS_GLOS.has(g.tipo)) fail(`glosario ${g.id}: tipo inválido "${g.tipo}"`);
+  for (const k of ["id", "categoria", "termino", "significado"])
+    if (!g[k] || !String(g[k]).trim()) fail(`glosario ${g.id || "?"}: falta ${k}`);
+}
+
 // IDs únicos
 const ids = new Set();
-for (const it of [...preguntas, ...cards]) {
+for (const it of [...preguntas, ...cards, ...glosario]) {
   if (ids.has(it.id)) fail(`id duplicado: ${it.id}`);
   ids.add(it.id);
 }
 
 const bank = {
   schemaVersion: 2,
-  bankVersion: new Date().toISOString().slice(0, 10) + ".2",
+  bankVersion: new Date().toISOString().slice(0, 10) + ".3",
   temas: TEMAS,
   cursos: CURSOS,
   preguntas,
   tarjetas: cards,
+  glosario,
 };
 writeFileSync(resolve(APP, "data", "questions.json"), JSON.stringify(bank, null, 1), "utf8");
 
 const porTema = {};
 for (const q of preguntas) porTema[q.tema] = (porTema[q.tema] || 0) + 1;
 const traducidas = preguntas.filter((q) => q.stem_es).length;
-console.log(`✅ ${preguntas.length} preguntas (${traducidas} con traducción ES, ${sinTraduccion} sin) + ${cards.length} tarjetas, 0 errores → data/questions.json (banco ${bank.bankVersion})`);
+console.log(`✅ ${preguntas.length} preguntas (${traducidas} con traducción ES, ${sinTraduccion} sin) + ${cards.length} tarjetas + ${glosario.length} glosario, 0 errores → data/questions.json (banco ${bank.bankVersion})`);
 for (const [t, c] of Object.entries(porTema).sort((a, b) => b[1] - a[1]))
   console.log(`   ${TEMAS[t].nombre}: ${c}`);
