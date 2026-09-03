@@ -1,44 +1,303 @@
 [
- { "id": "card-001", "tema": "hooks-permisos", "titulo": "updatedInput: redacta, no bloquees", "cuerpo": "Un PreToolUse tiene 4 salidas: <b>allow / deny / ask</b>… y la elegante: <b><code>updatedInput</code></b> — <b>REESCRIBE la llamada</b> (quita el secreto, el trabajo corre). Catch: reemplaza el input <b>completo</b> — devuelve también los campos que no cambias.", "origen": "registro-errores" },
- { "id": "card-002", "tema": "hooks-permisos", "titulo": "exit 2 vs exit 1", "cuerpo": "<b>exit 2 = BLOQUEA</b> (stderr se le entrega a Claude; puede bloquear incluso Stop).<br><b>exit 1 = NO bloquea</b> 🪤 — se siente error pero Claude ejecuta igual. Para detener: 2, no 1.", "origen": "registro-errores" },
- { "id": "card-003", "tema": "hooks-permisos", "titulo": "El gate del turno", "cuerpo": "Para que Claude NO pueda decir \"terminé\" con tests rotos: <b>Stop hook</b> que corre los tests y sale con <b>exit 2</b> si fallan — el turno no termina y el stderr regresa a Claude, que arregla solo.", "origen": "registro-errores" },
- { "id": "card-004", "tema": "hooks-permisos", "titulo": "Re-inyectar tras /compact", "cuerpo": "Para devolver contexto después de una compactación: <b>SessionStart con matcher <code>compact</code></b> — su output SÍ vuelve a la conversación. <b>PostCompact NO sirve</b> para esto.", "origen": "guia-repaso" },
- { "id": "card-005", "tema": "hooks-permisos", "titulo": "Bypass permissions", "cuerpo": "<b>SOLO dentro de un contenedor o VM aislado.</b> \"Confío en mis prompts\" NO es un control de seguridad. En tu laptop: <b>auto mode</b> (conserva al clasificador). Bypass = cero checks, ni clasificador.", "origen": "registro-errores" },
- { "id": "card-006", "tema": "hooks-permisos", "titulo": "El clasificador de Auto mode", "cuerpo": "Guarda <b>INTENCIÓN, no CORRECCIÓN</b>. Bloquea: deploys a prod, force push, pipe de código descargado, exfiltración. Deja pasar código ROTO — <i>\"broken isn't dangerous\"</i>. El par completo: Auto (antes) + Stop hook con tests (después).", "origen": "guia-repaso" },
- { "id": "card-007", "tema": "hooks-permisos", "titulo": "Los 6 permission modes", "cuerpo": "<b>Manual</b> (solo lee) · <b>Accept edits</b> (lee+edita+bash común; revisas después) · <b>Plan</b> (solo propone) · <b>Auto</b> (todo, con clasificador) · <b>Don't ask</b> (solo pre-aprobado; el resto se auto-deniega SIN prompt) · <b>Bypass</b> (sin checks — solo VM/contenedor).", "origen": "apuntes-04" },
- { "id": "card-008", "tema": "hooks-permisos", "titulo": "Don't ask: la lógica", "cuerpo": "En un pipeline sin humanos, un prompt de aprobación = <b>pipeline colgado para siempre</b>. Auto-denegar sin preguntar es la feature, no un defecto. CI / jobs nocturnos → Don't ask.", "origen": "apuntes-04" },
- { "id": "card-009", "tema": "hooks-permisos", "titulo": "Hooks: la frase que lo define", "cuerpo": "<i>\"Hooks turn a rule Claude usually follows into one it <b>always</b> follows.\"</i><br>CLAUDE.md y skills son instrucciones que Claude <b>SIGUE</b>; un hook es código que <b>CORRE</b>.", "origen": "apuntes-04" },
- { "id": "card-010", "tema": "hooks-permisos", "titulo": "exit 0 y el texto plano", "cuerpo": "Con <b>exit 0</b>: el JSON en stdout se parsea; el texto plano se IGNORA… salvo en <b>SessionStart, UserPromptSubmit y UserPromptExpansion</b>, donde SE AGREGA al contexto (así funciona el hook preservador de estado).", "origen": "apuntes-04" },
- { "id": "card-011", "tema": "automatizacion", "titulo": "-p vs --bare (verificado en docs)", "cuerpo": "Quien salta la auto-discovery (hooks, skills, plugins, MCP, CLAUDE.md) es <b><code>--bare</code></b>. <b><code>-p</code> a secas SÍ carga el entorno local.</b> Receta para scripts limpios: <code>claude --bare -p \"...\"</code>.", "origen": "registro-errores" },
- { "id": "card-012", "tema": "automatizacion", "titulo": "Output estructurado en headless", "cuerpo": "<code>--output-format json --json-schema '...'</code> → Claude RESTRINGE su salida al schema y el objeto cae en el campo <b><code>structured_output</code></b> → <code>jq</code> → base de datos.", "origen": "registro-errores" },
- { "id": "card-013", "tema": "automatizacion", "titulo": "Multi-paso con sesiones", "cuerpo": "Script A captura el <b><code>session_id</code></b> de su output JSON → script B corre <b><code>claude --resume \"$id\"</code></b> y retoma <b>con todo el contexto</b>. Un script planea, otro ejecuta.", "origen": "registro-errores" },
- { "id": "card-014", "tema": "automatizacion", "titulo": "Los 3 límites de routines", "cuerpo": "1) Research preview (cambiará). 2) Recurrencia <b>máximo cada hora</b>. 3) Clone fresco del default branch que solo pushea a ramas <b><code>claude/</code></b> — el guardrail anti-\"reescribir main\".", "origen": "apuntes-04" },
- { "id": "card-015", "tema": "automatizacion", "titulo": "El espectro de control", "cuerpo": "<b>Routines</b> (no construyes nada, infra de Anthropic) → <b>-p</b> (tu pipeline) → <b>--bare</b> (CI determinista) → <b>Agent SDK</b> (tu producto). <i>\"Start with routines; drop down only when the job needs the control.\"</i>", "origen": "apuntes-04" },
- { "id": "card-016", "tema": "automatizacion", "titulo": "claude_args para CI sin humano", "cuerpo": "Los 3 knobs: <b>--max-turns</b> (tope al loop) + <b>permission mode que no pregunte</b> (sin humano, un prompt cuelga todo) + <b>allowed tools mínimas</b> (un reporte = read-only).", "origen": "apuntes-04" },
- { "id": "card-017", "tema": "automatizacion", "titulo": "Code Review administrado: fronteras", "cuerpo": "<b>NUNCA aprueba ni bloquea el PR</b> (el juicio es humano) · <b>SIN autofix administrado</b> — aplicar findings es local: <b><code>/code-review --fix</code></b> · analiza el diff contra el <b>codebase completo</b> y deduplica/rankea.", "origen": "registro-errores" },
- { "id": "card-018", "tema": "automatizacion", "titulo": "API key del GitHub Action", "cuerpo": "<code>anthropic_api_key</code> es <b>condicional</b>: requerida SOLO con la Claude API directa. Con <b>Bedrock / Vertex / Foundry / OAuth / WIF</b> no se usa (autentican vía OIDC).", "origen": "registro-errores" },
- { "id": "card-019", "tema": "skills", "titulo": "Los números sagrados", "cuerpo": "<b>64</b> chars máx el <code>name</code> (minúsculas/números/guiones, = carpeta) · <b>1,024</b> chars máx la <code>description</code> · <b>500</b> líneas la guía para SKILL.md · <b>2 requeridos + 2 opcionales</b> (allowed-tools, model).", "origen": "apuntes-01" },
- { "id": "card-020", "tema": "skills", "titulo": "E-P-P-P", "cuerpo": "Conflicto de NOMBRE entre skills: gana la de mayor prioridad —<br><b>Enterprise → Personal → Project → Plugins</b>.<br>🪤 Personal le gana a Project (la intuición dice lo contrario). Plugins SIEMPRE al final.", "origen": "apuntes-01" },
- { "id": "card-021", "tema": "skills", "titulo": "La prioridad la define DÓNDE VIVE", "cuerpo": "Una skill de terceros copiada a <code>~/.claude/skills/</code> se vuelve <b>Personal</b>; copiada al repo, <b>Project</b>. \"Plugins\" solo aplica si llegó empaquetada en un plugin. Trade-off: plugin recibe updates; copia es tuya y editable.", "origen": "apuntes-01" },
- { "id": "card-022", "tema": "skills", "titulo": "La escalera de distribución", "cuerpo": "<b>Repo</b> (.claude/skills commiteado → equipo, updates con git pull) → <b>Plugin</b> (marketplace → comunidad, no project-specific) → <b>Enterprise</b> (managed settings → keyword <b>\"MUST\"</b>, compliance, pisa todo nombre igual).", "origen": "apuntes-01" },
- { "id": "card-023", "tema": "skills", "titulo": "Ciclo de activación de una skill", "cuerpo": "Arranque: carga <b>solo name + description</b> de 4 ubicaciones → tu petición se compara <b>semánticamente</b> (intención, no keywords) → match → <b>confirmación</b> → carga el SKILL.md completo. Cambios = reiniciar Claude Code.", "origen": "apuntes-01" },
- { "id": "card-024", "tema": "skills", "titulo": "Una description que dispara", "cuerpo": "Responde 2 preguntas: <b>¿qué hace?</b> + <b>¿cuándo usarla?</b> — con varias formulaciones reales (\"Use when…\"). Si no se dispara: agrega las frases que TÚ usas. Si dispara la equivocada: hazlas más distintas.", "origen": "apuntes-01" },
- { "id": "card-025", "tema": "subagents", "titulo": "El gotcha de los subagents", "cuerpo": "Los subagents <b>NO heredan skills</b> — nacen con <i>\"fresh, clean context\"</i>. Hay que listarlas en el campo <b><code>skills:</code></b> del frontmatter. Si una opción dice \"inherits\"/\"hereda\" sobre subagents: desconfía.", "origen": "apuntes-01" },
- { "id": "card-026", "tema": "subagents", "titulo": "Built-in vs custom", "cuerpo": "<b>Built-in</b> (Explore, Plan, Verify): <b>JAMÁS</b> pueden usar skills.<br><b>Custom</b> (<code>.claude/agents/*.md</code>): sí, pero solo las listadas en <code>skills:</code> (y con el tool <code>Skill</code> disponible).", "origen": "apuntes-01" },
- { "id": "card-027", "tema": "subagents", "titulo": "Skills en subagent: carga al arrancar", "cuerpo": "En un subagent las skills listadas cargan <b>AL ARRANCAR, todas completas</b> — sin matching on-demand ni confirmación. Regla: <i>\"only list skills that are always relevant to the subagent's purpose\"</i>.", "origen": "apuntes-01" },
- { "id": "card-028", "tema": "subagents", "titulo": "¿Qué es un subagent?", "cuerpo": "OTRO Claude que nace en blanco, hace UNA tarea delegada en su <b>contexto aislado</b> y devuelve el resultado. Ganas aislamiento (50 archivos leídos nunca tocan TU contexto); pierdes historial y corrección a medio camino.", "origen": "apuntes-03" },
- { "id": "card-029", "tema": "troubleshooting", "titulo": "No se dispara → description", "cuerpo": "Skill que existe y pasa validación pero no se activa: <i>\"the cause is almost always the <b>description</b>\"</i> — falta overlap con tus frases. Prueba variaciones (\"why is this slow?\") y agrega las que fallen.", "origen": "apuntes-01" },
- { "id": "card-030", "tema": "troubleshooting", "titulo": "No carga → estructura", "cuerpo": "SKILL.md debe estar <b>dentro de un directorio con nombre</b> (no suelto en la raíz de skills/) y llamarse exactamente <b>SKILL.md</b> (SKILL mayúsculas, md minúsculas). Diagnóstico: <code>claude --debug</code>. Primero siempre: el <b>validator</b> (uv).", "origen": "apuntes-01" },
- { "id": "card-031", "tema": "troubleshooting", "titulo": "Shadowed → renombra", "cuerpo": "¿Tu skill personal es ignorada? Una de mayor prioridad tiene el <b>mismo nombre</b> (E-P-P-P). Camino fácil: <b>renombrar</b> la tuya a algo distinto (\"frontend-review\", no \"review\"). Plan B: hablar con el admin.", "origen": "apuntes-01" },
- { "id": "card-032", "tema": "troubleshooting", "titulo": "Runtime errors: el trío", "cuerpo": "1) <b>Dependencias</b> instaladas (y anotadas en la description). 2) <b><code>chmod +x</code></b> a los scripts. 3) <b>Forward slashes ( / ) en TODAS las rutas — incluso en Windows</b>. Plugin sin skills: clear cache → restart → reinstall → validator.", "origen": "apuntes-01" },
- { "id": "card-033", "tema": "claude-code", "titulo": "CLAUDE.md: guidance, no enforcement", "cuerpo": "<i>\"CLAUDE.md is not enforced configuration. It's guidance.\"</i> Cada línea <b>compite</b> por atención — archivo gigante = reglas ignoradas. <i>\"The leaner the file, the more of it Claude follows.\"</i> Hard rules → hooks.", "origen": "apuntes-04" },
- { "id": "card-034", "tema": "claude-code", "titulo": "Los 4 CLAUDE.md SE APILAN", "cuerpo": "Managed policy (inexcluible) + User + Project + Local (git-ignored): <b>todos cargan JUNTOS al arrancar</b> — \"they stack, nothing gets dropped\". 🪤 El contraste: la prioridad E-P-P-P es de SKILLS, no de CLAUDE.md.", "origen": "guia-repaso" },
- { "id": "card-035", "tema": "claude-code", "titulo": "Imports ≠ progressive disclosure", "cuerpo": "Los imports <code>@ruta/archivo</code> de CLAUDE.md se <b>expanden inline AL ARRANCAR</b> — organizan, <b>NO reducen el contexto</b>. La carga diferida real es la de las skills (references/ con \"Only load when…\").", "origen": "guia-repaso" },
- { "id": "card-036", "tema": "claude-code", "titulo": "El énfasis es un presupuesto", "cuerpo": "\"IMPORTANT\" y \"YOU MUST\" suben prioridad solo RELATIVO a lo que está en volumen normal. <b>Si todo grita, nada resalta.</b> Gasta el énfasis en las 2-3 reglas que más duelen al romperse. Y: regla específica y verificable + nombra el reemplazo.", "origen": "apuntes-04" },
- { "id": "card-037", "tema": "claude-code", "titulo": "Verificación de corridas no supervisadas", "cuerpo": "<i>\"The less you watched, the more you verify.\"</i> 1) Empieza por el <b>DIFF, no el resumen</b> (\"a clean write-up is not proof of clean code\"). 2) Tests como <b>gate cableado</b>, no promesa. 3) <b>Cold second opinion</b>: subagent fresco sin memoria del enfoque.", "origen": "apuntes-04" },
- { "id": "card-038", "tema": "claude-code", "titulo": "Plugins: privilegios y apilado", "cuerpo": "Un plugin corre código <b>con TUS privilegios</b>: instalas por sus skills y te llevas sus hooks — que se <b>APILAN</b> con los tuyos. Su clave <code>agent</code> puede promover un subagent al hilo PRINCIPAL. <i>\"Read before you install\"</i> · <i>\"reviewed isn't the same as trusted\"</i>.", "origen": "apuntes-04" },
- { "id": "card-039", "tema": "contexto", "titulo": "Los 3 niveles de progressive disclosure", "cuerpo": "<b>1 · Metadata</b> (name+description — siempre cargado) → <b>2 · Instrucciones</b> (cuerpo del SKILL.md — al activarse) → <b>3 · Recursos</b> (references/ se LEEN · scripts/ se EJECUTAN · assets/ se USAN — solo si la tarea lo pide). \"A table of contents in the context window.\"", "origen": "apuntes-02" },
- { "id": "card-040", "tema": "contexto", "titulo": "/compact vs Rewind-summarize", "cuerpo": "<b>/compact</b> selecciona por TEMA y comprime TODO (dirígelo: di qué CONSERVAR; nunca toca disco).<br><b>Rewind-summarize</b> selecciona por POSICIÓN (parte en un checkpoint; un lado queda literal; Rewind SÍ puede restaurar archivos). Doble Esc abre el menú.", "origen": "apuntes-04" },
- { "id": "card-041", "tema": "contexto", "titulo": "/goal: el evaluador solo lee el transcript", "cuerpo": "La condición de <code>/goal</code> debe ser <b>verificable en el output impreso</b>: \"pytest reports 0 failures\" ✔ · \"the code feels cleaner\" ✘. Goal = CUÁNDO PARAR · Loop = CADA CUÁNTO MIRAR estado externo (CI, deploys).", "origen": "apuntes-04" },
- { "id": "card-042", "tema": "mecanismos", "titulo": "¿Qué le falta a Claude?", "cuerpo": "<b>Manos</b> (sistema externo) → MCP · <b>Espacio</b> (ensuciaría tu contexto) → Subagent · <b>Saber</b> → ¿siempre? CLAUDE.md / ¿a veces? Skill · <b>Nada, solo debe pasar</b> → Hook.<br>Chequeo de seguridad: ¿toleras que a veces NO pase? No → Hook, sin importar lo demás.", "origen": "apuntes-03" }
+ {
+  "id": "card-001",
+  "tema": "hooks-permisos",
+  "titulo": "updatedInput: redacta, no bloquees",
+  "cuerpo": "Un PreToolUse tiene 4 salidas: <b>allow / deny / ask</b>… y la elegante: <b><code>updatedInput</code></b> — <b>REESCRIBE la llamada</b> (quita el secreto, el trabajo corre). Catch: reemplaza el input <b>completo</b> — devuelve también los campos que no cambias.",
+  "origen": "registro-errores"
+ },
+ {
+  "id": "card-002",
+  "tema": "hooks-permisos",
+  "titulo": "exit 2 vs exit 1",
+  "cuerpo": "<b>exit 2 = BLOQUEA</b> (stderr se le entrega a Claude; puede bloquear incluso Stop).<br><b>exit 1 = NO bloquea</b> 🪤 — se siente error pero Claude ejecuta igual. Para detener: 2, no 1.",
+  "origen": "registro-errores"
+ },
+ {
+  "id": "card-003",
+  "tema": "hooks-permisos",
+  "titulo": "El gate del turno",
+  "cuerpo": "Para que Claude NO pueda decir \"terminé\" con tests rotos: <b>Stop hook</b> que corre los tests y sale con <b>exit 2</b> si fallan — el turno no termina y el stderr regresa a Claude, que arregla solo.",
+  "origen": "registro-errores"
+ },
+ {
+  "id": "card-004",
+  "tema": "hooks-permisos",
+  "titulo": "Re-inyectar tras /compact",
+  "cuerpo": "Para devolver contexto después de una compactación: <b>SessionStart con matcher <code>compact</code></b> — su output SÍ vuelve a la conversación. <b>PostCompact NO sirve</b> para esto.",
+  "origen": "guia-repaso"
+ },
+ {
+  "id": "card-005",
+  "tema": "hooks-permisos",
+  "titulo": "Bypass permissions",
+  "cuerpo": "<b>SOLO dentro de un contenedor o VM aislado.</b> \"Confío en mis prompts\" NO es un control de seguridad. En tu laptop: <b>auto mode</b> (conserva al clasificador). Bypass = cero checks, ni clasificador.",
+  "origen": "registro-errores"
+ },
+ {
+  "id": "card-006",
+  "tema": "hooks-permisos",
+  "titulo": "El clasificador de Auto mode",
+  "cuerpo": "Guarda <b>INTENCIÓN, no CORRECCIÓN</b>. Bloquea: deploys a prod, force push, pipe de código descargado, exfiltración. Deja pasar código ROTO — <i>\"broken isn't dangerous\"</i>. El par completo: Auto (antes) + Stop hook con tests (después).",
+  "origen": "guia-repaso"
+ },
+ {
+  "id": "card-007",
+  "tema": "hooks-permisos",
+  "titulo": "Los 6 permission modes",
+  "cuerpo": "<b>Manual</b> (solo lee) · <b>Accept edits</b> (lee+edita+bash común; revisas después) · <b>Plan</b> (solo propone) · <b>Auto</b> (todo, con clasificador) · <b>Don't ask</b> (solo pre-aprobado; el resto se auto-deniega SIN prompt) · <b>Bypass</b> (sin checks — solo VM/contenedor).",
+  "origen": "apuntes-04"
+ },
+ {
+  "id": "card-008",
+  "tema": "hooks-permisos",
+  "titulo": "Don't ask: la lógica",
+  "cuerpo": "En un pipeline sin humanos, un prompt de aprobación = <b>pipeline colgado para siempre</b>. Auto-denegar sin preguntar es la feature, no un defecto. CI / jobs nocturnos → Don't ask.",
+  "origen": "apuntes-04"
+ },
+ {
+  "id": "card-009",
+  "tema": "hooks-permisos",
+  "titulo": "Hooks: la frase que lo define",
+  "cuerpo": "<i>\"Hooks turn a rule Claude usually follows into one it <b>always</b> follows.\"</i><br>CLAUDE.md y skills son instrucciones que Claude <b>SIGUE</b>; un hook es código que <b>CORRE</b>.",
+  "origen": "apuntes-04"
+ },
+ {
+  "id": "card-010",
+  "tema": "hooks-permisos",
+  "titulo": "exit 0 y el texto plano",
+  "cuerpo": "Con <b>exit 0</b>: el JSON en stdout se parsea; el texto plano se IGNORA… salvo en <b>SessionStart, UserPromptSubmit y UserPromptExpansion</b>, donde SE AGREGA al contexto (así funciona el hook preservador de estado).",
+  "origen": "apuntes-04"
+ },
+ {
+  "id": "card-011",
+  "tema": "automatizacion",
+  "titulo": "-p vs --bare (verificado en docs)",
+  "cuerpo": "Quien salta la auto-discovery (hooks, skills, plugins, MCP, CLAUDE.md) es <b><code>--bare</code></b>. <b><code>-p</code> a secas SÍ carga el entorno local.</b> Receta para scripts limpios: <code>claude --bare -p \"...\"</code>.",
+  "origen": "registro-errores"
+ },
+ {
+  "id": "card-012",
+  "tema": "automatizacion",
+  "titulo": "Output estructurado en headless",
+  "cuerpo": "<code>--output-format json --json-schema '...'</code> → Claude RESTRINGE su salida al schema y el objeto cae en el campo <b><code>structured_output</code></b> → <code>jq</code> → base de datos.",
+  "origen": "registro-errores"
+ },
+ {
+  "id": "card-013",
+  "tema": "automatizacion",
+  "titulo": "Multi-paso con sesiones",
+  "cuerpo": "Script A captura el <b><code>session_id</code></b> de su output JSON → script B corre <b><code>claude --resume \"$id\"</code></b> y retoma <b>con todo el contexto</b>. Un script planea, otro ejecuta.",
+  "origen": "registro-errores"
+ },
+ {
+  "id": "card-014",
+  "tema": "automatizacion",
+  "titulo": "Los 3 límites de routines",
+  "cuerpo": "1) Research preview (cambiará). 2) Recurrencia <b>máximo cada hora</b>. 3) Clone fresco del default branch que solo pushea a ramas <b><code>claude/</code></b> — el guardrail anti-\"reescribir main\".",
+  "origen": "apuntes-04"
+ },
+ {
+  "id": "card-015",
+  "tema": "automatizacion",
+  "titulo": "El espectro de control",
+  "cuerpo": "<b>Routines</b> (no construyes nada, infra de Anthropic) → <b>-p</b> (tu pipeline) → <b>--bare</b> (CI determinista) → <b>Agent SDK</b> (tu producto). <i>\"Start with routines; drop down only when the job needs the control.\"</i>",
+  "origen": "apuntes-04"
+ },
+ {
+  "id": "card-016",
+  "tema": "automatizacion",
+  "titulo": "claude_args para CI sin humano",
+  "cuerpo": "Los 3 knobs: <b>--max-turns</b> (tope al loop) + <b>permission mode que no pregunte</b> (sin humano, un prompt cuelga todo) + <b>allowed tools mínimas</b> (un reporte = read-only).",
+  "origen": "apuntes-04"
+ },
+ {
+  "id": "card-017",
+  "tema": "automatizacion",
+  "titulo": "Code Review administrado: fronteras",
+  "cuerpo": "<b>NUNCA aprueba ni bloquea el PR</b> (el juicio es humano) · <b>SIN autofix administrado</b> — aplicar findings es local: <b><code>/code-review --fix</code></b> · analiza el diff contra el <b>codebase completo</b> y deduplica/rankea.",
+  "origen": "registro-errores"
+ },
+ {
+  "id": "card-018",
+  "tema": "automatizacion",
+  "titulo": "API key del GitHub Action",
+  "cuerpo": "<code>anthropic_api_key</code> es <b>condicional</b>: requerida SOLO con la Claude API directa. Con <b>Bedrock / Vertex / Foundry / OAuth / WIF</b> no se usa (autentican vía OIDC).",
+  "origen": "registro-errores"
+ },
+ {
+  "id": "card-019",
+  "tema": "skills",
+  "titulo": "Los números sagrados",
+  "cuerpo": "<b>64</b> chars máx el <code>name</code> (minúsculas/números/guiones, = carpeta) · <b>1,024</b> chars máx la <code>description</code> · <b>500</b> líneas la guía para SKILL.md · <b>2 requeridos + 2 opcionales</b> (allowed-tools, model).",
+  "origen": "apuntes-01"
+ },
+ {
+  "id": "card-020",
+  "tema": "skills",
+  "titulo": "E-P-P-P",
+  "cuerpo": "Conflicto de NOMBRE entre skills: gana la de mayor prioridad —<br><b>Enterprise → Personal → Project → Plugins</b>.<br>🪤 Personal le gana a Project (la intuición dice lo contrario). Plugins SIEMPRE al final.",
+  "origen": "apuntes-01"
+ },
+ {
+  "id": "card-021",
+  "tema": "skills",
+  "titulo": "La prioridad la define DÓNDE VIVE",
+  "cuerpo": "Una skill de terceros copiada a <code>~/.claude/skills/</code> se vuelve <b>Personal</b>; copiada al repo, <b>Project</b>. \"Plugins\" solo aplica si llegó empaquetada en un plugin. Trade-off: plugin recibe updates; copia es tuya y editable.",
+  "origen": "apuntes-01"
+ },
+ {
+  "id": "card-022",
+  "tema": "skills",
+  "titulo": "La escalera de distribución",
+  "cuerpo": "<b>Repo</b> (.claude/skills commiteado → equipo, updates con git pull) → <b>Plugin</b> (marketplace → comunidad, no project-specific) → <b>Enterprise</b> (managed settings → keyword <b>\"MUST\"</b>, compliance, pisa todo nombre igual).",
+  "origen": "apuntes-01"
+ },
+ {
+  "id": "card-023",
+  "tema": "skills",
+  "titulo": "Ciclo de activación de una skill",
+  "cuerpo": "Arranque: carga <b>solo name + description</b> de 4 ubicaciones → tu petición se compara <b>semánticamente</b> (intención, no keywords) → match → <b>confirmación</b> → carga el SKILL.md completo. Cambios = reiniciar Claude Code.",
+  "origen": "apuntes-01"
+ },
+ {
+  "id": "card-024",
+  "tema": "skills",
+  "titulo": "Una description que dispara",
+  "cuerpo": "Responde 2 preguntas: <b>¿qué hace?</b> + <b>¿cuándo usarla?</b> — con varias formulaciones reales (\"Use when…\"). Si no se dispara: agrega las frases que TÚ usas. Si dispara la equivocada: hazlas más distintas.",
+  "origen": "apuntes-01"
+ },
+ {
+  "id": "card-025",
+  "tema": "subagents",
+  "titulo": "El gotcha de los subagents",
+  "cuerpo": "Los subagents <b>NO heredan skills</b> — nacen con <i>\"fresh, clean context\"</i>. Hay que listarlas en el campo <b><code>skills:</code></b> del frontmatter. Si una opción dice \"inherits\"/\"hereda\" sobre subagents: desconfía.",
+  "origen": "apuntes-01"
+ },
+ {
+  "id": "card-026",
+  "tema": "subagents",
+  "titulo": "Built-in vs custom",
+  "cuerpo": "<b>Built-in</b> (Explore, Plan, Verify): <b>JAMÁS</b> pueden usar skills.<br><b>Custom</b> (<code>.claude/agents/*.md</code>): sí, pero solo las listadas en <code>skills:</code> (y con el tool <code>Skill</code> disponible).",
+  "origen": "apuntes-01"
+ },
+ {
+  "id": "card-027",
+  "tema": "subagents",
+  "titulo": "Skills en subagent: carga al arrancar",
+  "cuerpo": "En un subagent las skills listadas cargan <b>AL ARRANCAR, todas completas</b> — sin matching on-demand ni confirmación. Regla: <i>\"only list skills that are always relevant to the subagent's purpose\"</i>.",
+  "origen": "apuntes-01"
+ },
+ {
+  "id": "card-028",
+  "tema": "subagents",
+  "titulo": "¿Qué es un subagent?",
+  "cuerpo": "OTRO Claude que nace en blanco, hace UNA tarea delegada en su <b>contexto aislado</b> y devuelve el resultado. Ganas aislamiento (50 archivos leídos nunca tocan TU contexto); pierdes historial y corrección a medio camino.",
+  "origen": "apuntes-03"
+ },
+ {
+  "id": "card-029",
+  "tema": "troubleshooting",
+  "titulo": "No se dispara → description",
+  "cuerpo": "Skill que existe y pasa validación pero no se activa: <i>\"the cause is almost always the <b>description</b>\"</i> — falta overlap con tus frases. Prueba variaciones (\"why is this slow?\") y agrega las que fallen.",
+  "origen": "apuntes-01"
+ },
+ {
+  "id": "card-030",
+  "tema": "troubleshooting",
+  "titulo": "No carga → estructura",
+  "cuerpo": "SKILL.md debe estar <b>dentro de un directorio con nombre</b> (no suelto en la raíz de skills/) y llamarse exactamente <b>SKILL.md</b> (SKILL mayúsculas, md minúsculas). Diagnóstico: <code>claude --debug</code>. Primero siempre: el <b>validator</b> (uv).",
+  "origen": "apuntes-01"
+ },
+ {
+  "id": "card-031",
+  "tema": "troubleshooting",
+  "titulo": "Shadowed → renombra",
+  "cuerpo": "¿Tu skill personal es ignorada? Una de mayor prioridad tiene el <b>mismo nombre</b> (E-P-P-P). Camino fácil: <b>renombrar</b> la tuya a algo distinto (\"frontend-review\", no \"review\"). Plan B: hablar con el admin.",
+  "origen": "apuntes-01"
+ },
+ {
+  "id": "card-032",
+  "tema": "troubleshooting",
+  "titulo": "Runtime errors: el trío",
+  "cuerpo": "1) <b>Dependencias</b> instaladas (y anotadas en la description). 2) <b><code>chmod +x</code></b> a los scripts. 3) <b>Forward slashes ( / ) en TODAS las rutas — incluso en Windows</b>. Plugin sin skills: clear cache → restart → reinstall → validator.",
+  "origen": "apuntes-01"
+ },
+ {
+  "id": "card-033",
+  "tema": "claude-code",
+  "titulo": "CLAUDE.md: guidance, no enforcement",
+  "cuerpo": "<i>\"CLAUDE.md is not enforced configuration. It's guidance.\"</i> Cada línea <b>compite</b> por atención — archivo gigante = reglas ignoradas. <i>\"The leaner the file, the more of it Claude follows.\"</i> Hard rules → hooks.",
+  "origen": "apuntes-04"
+ },
+ {
+  "id": "card-034",
+  "tema": "claude-code",
+  "titulo": "Los 4 CLAUDE.md SE APILAN",
+  "cuerpo": "Managed policy (inexcluible) + User + Project + Local (git-ignored): <b>todos cargan JUNTOS al arrancar</b> — \"they stack, nothing gets dropped\". 🪤 El contraste: la prioridad E-P-P-P es de SKILLS, no de CLAUDE.md.",
+  "origen": "guia-repaso"
+ },
+ {
+  "id": "card-035",
+  "tema": "claude-code",
+  "titulo": "Imports ≠ progressive disclosure",
+  "cuerpo": "Los imports <code>@ruta/archivo</code> de CLAUDE.md se <b>expanden inline AL ARRANCAR</b> — organizan, <b>NO reducen el contexto</b>. La carga diferida real es la de las skills (references/ con \"Only load when…\").",
+  "origen": "guia-repaso"
+ },
+ {
+  "id": "card-036",
+  "tema": "claude-code",
+  "titulo": "El énfasis es un presupuesto",
+  "cuerpo": "\"IMPORTANT\" y \"YOU MUST\" suben prioridad solo RELATIVO a lo que está en volumen normal. <b>Si todo grita, nada resalta.</b> Gasta el énfasis en las 2-3 reglas que más duelen al romperse. Y: regla específica y verificable + nombra el reemplazo.",
+  "origen": "apuntes-04"
+ },
+ {
+  "id": "card-037",
+  "tema": "claude-code",
+  "titulo": "Verificación de corridas no supervisadas",
+  "cuerpo": "<i>\"The less you watched, the more you verify.\"</i> 1) Empieza por el <b>DIFF, no el resumen</b> (\"a clean write-up is not proof of clean code\"). 2) Tests como <b>gate cableado</b>, no promesa. 3) <b>Cold second opinion</b>: subagent fresco sin memoria del enfoque.",
+  "origen": "apuntes-04"
+ },
+ {
+  "id": "card-038",
+  "tema": "claude-code",
+  "titulo": "Plugins: privilegios y apilado",
+  "cuerpo": "Un plugin corre código <b>con TUS privilegios</b>: instalas por sus skills y te llevas sus hooks — que se <b>APILAN</b> con los tuyos. Su clave <code>agent</code> puede promover un subagent al hilo PRINCIPAL. <i>\"Read before you install\"</i> · <i>\"reviewed isn't the same as trusted\"</i>.",
+  "origen": "apuntes-04"
+ },
+ {
+  "id": "card-039",
+  "tema": "contexto",
+  "titulo": "Los 3 niveles de progressive disclosure",
+  "cuerpo": "<b>1 · Metadata</b> (name+description — siempre cargado) → <b>2 · Instrucciones</b> (cuerpo del SKILL.md — al activarse) → <b>3 · Recursos</b> (references/ se LEEN · scripts/ se EJECUTAN · assets/ se USAN — solo si la tarea lo pide). \"A table of contents in the context window.\"",
+  "origen": "apuntes-02"
+ },
+ {
+  "id": "card-040",
+  "tema": "contexto",
+  "titulo": "/compact vs Rewind-summarize",
+  "cuerpo": "<b>/compact</b> selecciona por TEMA y comprime TODO (dirígelo: di qué CONSERVAR; nunca toca disco).<br><b>Rewind-summarize</b> selecciona por POSICIÓN (parte en un checkpoint; un lado queda literal; Rewind SÍ puede restaurar archivos). Doble Esc abre el menú.",
+  "origen": "apuntes-04"
+ },
+ {
+  "id": "card-041",
+  "tema": "contexto",
+  "titulo": "/goal: el evaluador solo lee el transcript",
+  "cuerpo": "La condición de <code>/goal</code> debe ser <b>verificable en el output impreso</b>: \"pytest reports 0 failures\" ✔ · \"the code feels cleaner\" ✘. Goal = CUÁNDO PARAR · Loop = CADA CUÁNTO MIRAR estado externo (CI, deploys).",
+  "origen": "apuntes-04"
+ },
+ {
+  "id": "card-042",
+  "tema": "mecanismos",
+  "titulo": "¿Qué le falta a Claude?",
+  "cuerpo": "<b>Manos</b> (sistema externo) → MCP · <b>Espacio</b> (ensuciaría tu contexto) → Subagent · <b>Saber</b> → ¿siempre? CLAUDE.md / ¿a veces? Skill · <b>Nada, solo debe pasar</b> → Hook.<br>Chequeo de seguridad: ¿toleras que a veces NO pase? No → Hook, sin importar lo demás.",
+  "origen": "apuntes-03"
+ },
+ {
+  "id": "card-043",
+  "tema": "skills",
+  "titulo": "Los números sagrados de una skill",
+  "cuerpo": "name ≤ <b>64</b> chars (y = nombre de la carpeta) · description ≤ <b>1,024</b> chars · SKILL.md bajo ~<b>500</b> líneas (guía, no límite duro). Dos campos requeridos (name, description) + dos opcionales (allowed-tools, model).",
+  "origen": "sim04-q08 → tarjeta (dato de memoria pura; el examen real no pregunta así)"
+ }
 ]
