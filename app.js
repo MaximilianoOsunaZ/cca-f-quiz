@@ -179,35 +179,68 @@ function updateFeedCount() {
 }
 
 // ---------- Render ----------
+const correctasDe = (q) => q.multiRespuesta ? q.correcta : [q.correcta];
+function sameSet(a, b) {
+  const A = new Set(a), B = new Set(b);
+  return A.size === B.size && [...A].every((x) => B.has(x));
+}
+function pqfHtml(q) {
+  if (!q.porQueFallan) return "";
+  const tipos = q.tiposDistractor || {};
+  return `<div class="pqf">` + Object.entries(q.porQueFallan).map(([l, txt]) =>
+    `<div class="pqfrow"><span class="pqfletter">${l}</span><div><span class="pqftipo">${tipos[l] || ""}</span> ${txt}</div></div>`).join("") + `</div>`;
+}
 function renderQuestion(q) {
   const host = document.getElementById("feed-item");
   const scen = q.escenario
     ? `<details class="scen"><summary>${qScenTitle(q.escenario)}</summary><p>${qScenText(q.escenario)}</p></details>` : "";
   const letters = ["A", "B", "C", "D"];
+  const multi = !!q.multiRespuesta;
   host.innerHTML = `${scen}
+    ${multi ? `<div class="multihint">☑️ Respuesta múltiple — marca ${correctasDe(q).length} opciones y comprueba</div>` : ""}
     <p class="stem">${qStem(q)}</p>
     <div class="opts">${qOpts(q).map((o, i) =>
       `<button class="optbtn" data-letter="${letters[i]}"><span class="letter">${letters[i]}</span><span>${o}</span></button>`).join("")}
     </div>
+    ${multi ? `<div class="checkwrap"><button class="primary" id="btn-check" disabled>Comprobar</button></div>` : ""}
     <div id="expl-slot"></div>`;
-  host.querySelectorAll(".optbtn").forEach((b) => b.addEventListener("click", () => answer(q, b.dataset.letter)));
-  if (feed.answered) paintResult(q, feed.answered.letter, feed.answered.ok);
+  if (multi) {
+    const need = correctasDe(q).length;
+    host.querySelectorAll(".optbtn").forEach((b) => b.addEventListener("click", () => {
+      if (feed.answered) return;
+      b.classList.toggle("picked");
+      document.getElementById("btn-check").disabled = host.querySelectorAll(".optbtn.picked").length !== need;
+    }));
+    document.getElementById("btn-check").addEventListener("click", () => {
+      const picks = [...host.querySelectorAll(".optbtn.picked")].map((b) => b.dataset.letter);
+      answer(q, picks);
+    });
+  } else {
+    host.querySelectorAll(".optbtn").forEach((b) => b.addEventListener("click", () => answer(q, b.dataset.letter)));
+  }
+  if (feed.answered) paintResult(q);
 }
-function paintResult(q, letter, ok) {
-  document.querySelectorAll(".optbtn").forEach((b) => {
+function paintResult(q) {
+  const ans = feed.answered;
+  const picks = new Set(Array.isArray(ans.pick) ? ans.pick : [ans.pick]);
+  const correctas = new Set(correctasDe(q));
+  document.querySelectorAll("#feed-item .optbtn").forEach((b) => {
     b.disabled = true;
-    if (b.dataset.letter === q.correcta) b.classList.add("right");
-    else if (b.dataset.letter === letter) b.classList.add("wrongpick");
+    b.classList.remove("picked");
+    if (correctas.has(b.dataset.letter)) b.classList.add("right");
+    else if (picks.has(b.dataset.letter)) b.classList.add("wrongpick");
     else b.classList.add("dim");
   });
+  const chk = document.getElementById("btn-check");
+  if (chk) chk.style.display = "none";
   document.getElementById("expl-slot").innerHTML =
-    `<div class="expl ${ok ? "" : "bad"}"><div class="verdict ${ok ? "ok" : "no"}">${ok ? "✔ ¡Correcto!" : "✘ Incorrecto"}</div>${q.explicacion}</div>`;
+    `<div class="expl ${ans.ok ? "" : "bad"}"><div class="verdict ${ans.ok ? "ok" : "no"}">${ans.ok ? "✔ ¡Correcto!" : "✘ Incorrecto"}</div>${q.explicacion}${pqfHtml(q)}</div>`;
 }
-function answer(q, letter) {
+function answer(q, pick) {
   if (feed.answered) return;
-  const ok = letter === q.correcta;
-  feed.answered = { letter, ok };
-  paintResult(q, letter, ok);
+  const ok = Array.isArray(pick) ? sameSet(pick, correctasDe(q)) : pick === q.correcta;
+  feed.answered = { pick, ok };
+  paintResult(q);
   const p = S.preguntas[q.id] || { caja: 0, intentos: 0, aciertos: 0, ultimoVisto: null, ultimoOk: null };
   p.intentos++; if (ok) { p.aciertos++; p.caja = Math.min(3, p.caja + 1); } else p.caja = 0;
   p.ultimoVisto = today(); p.ultimoOk = ok;
@@ -358,7 +391,7 @@ function buildCopyText() {
 
 // ---------- Glosario ----------
 const glos = { curso: "all", q: "" };
-const GLOS_CURSO = { c1: "Agent Skills", c4: "Claude Code in Action", gen: "Base" };
+const GLOS_CURSO = { c1: "Agent Skills", c3: "Intro to MCP", c4: "Claude Code in Action", gen: "Base" };
 const GLOS_MONO = new Set(["comando", "flag", "evento", "campo", "salida"]);
 const norm = (s) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 function renderGlosario() {
@@ -400,13 +433,239 @@ function renderGlosario() {
   }));
 }
 
+// ---------- Simulacro ----------
+// Reparto por dominio de GUIA-EXAMEN/04 (peso de lo estudiado, no del examen real)
+const SIM_REPARTO = { 3: 21, 2: 18, 1: 12, 5: 9 }; // = 60
+const SIM_DUR = 120 * 60; // 120 minutos, en segundos
+let simTimer = null;
+let simResultado = null; // resultado transitorio de la última entrega (para la revisión)
+
+function simState() {
+  if (!S.simulacro) S.simulacro = { activa: null, historial: [] };
+  return S.simulacro;
+}
+function simBuild() {
+  const porD = {};
+  for (const q of BANK.preguntas) (porD[q.dominio] = porD[q.dominio] || []).push(q);
+  const sel = [];
+  for (const [d, n] of Object.entries(SIM_REPARTO)) sel.push(...shuffle(porD[d] || []).slice(0, n));
+  if (sel.length < 60) {
+    const usados = new Set(sel.map((q) => q.id));
+    sel.push(...shuffle(BANK.preguntas.filter((q) => !usados.has(q.id))).slice(0, 60 - sel.length));
+  }
+  // agrupa por escenario: bloques en orden aleatorio, preguntas del mismo escenario juntas
+  const bloques = new Map();
+  for (const q of sel) {
+    const k = q.escenario ? q.escenario.titulo : "·libre·";
+    if (!bloques.has(k)) bloques.set(k, []);
+    bloques.get(k).push(q);
+  }
+  const qids = [];
+  for (const k of shuffle([...bloques.keys()])) for (const q of bloques.get(k)) qids.push(q.id);
+  return { qids, respuestas: {}, marcadas: [], idx: 0, inicio: Date.now(), terminado: false };
+}
+function simRestante(sim) { return Math.max(0, SIM_DUR - Math.floor((Date.now() - sim.inicio) / 1000)); }
+function fmtMMSS(s) { return `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`; }
+
+function renderSimulacro() {
+  const st = simState();
+  // simulacro activo con banco actualizado: valida que las preguntas sigan existiendo
+  if (st.activa && st.activa.qids.some((id) => !qById[id])) {
+    st.activa = null; save();
+    toast("El banco cambió — el simulacro anterior se descartó");
+  }
+  if (st.activa && !st.activa.terminado) { renderSimExam(); return; }
+  if (simResultado) { renderSimResult(); return; }
+  renderSimStart();
+}
+function renderSimStart() {
+  const st = simState();
+  const host = document.getElementById("sim-root");
+  const hist = (st.historial || []).slice(-5).reverse();
+  host.innerHTML = `
+    <button class="backbtn" data-nav="home">← Inicio</button>
+    <h2 style="margin-bottom:0.3rem">Simulacro 🎯</h2>
+    <div class="panel">
+      <p style="margin:0 0 0.6rem"><b>60 preguntas · 120 minutos</b> — como el examen real: cronómetro visible, preguntas agrupadas por escenario, sin retroalimentación hasta entregar. Al final: % por dominio, como el score report oficial.</p>
+      <p class="muted" style="margin:0 0 0.6rem">Reparto (peso de lo ya estudiado): D3 Claude Code ×21 · D2 Tool Design &amp; MCP ×18 · D1 Agentic Architecture ×12 · D5 Context ×9. El examen real aprueba con 720/1000 escalado — en la práctica apunta a <b>75%+</b> aquí.</p>
+      <p class="muted" style="margin:0">Puedes salir y volver: el cronómetro sigue corriendo (como el real). Recargar la página no lo pierde.</p>
+    </div>
+    <button class="primary" id="sim-go" style="width:100%">🚀 Comenzar simulacro</button>
+    ${hist.length ? `<div class="panel" style="margin-top:1rem"><h3>Historial</h3>${hist.map((h) =>
+      `<div class="row"><span>${h.fecha} · ${h.pct}%</span><span class="muted">${Object.entries(h.porDominio).map(([d, r]) => `D${d} ${Math.round((r.ok / r.n) * 100)}%`).join(" · ")}</span></div>`).join("")}</div>` : ""}`;
+  host.querySelector("[data-nav]").addEventListener("click", () => nav("home"));
+  document.getElementById("sim-go").addEventListener("click", () => {
+    simState().activa = simBuild(); save();
+    renderSimExam();
+  });
+}
+function renderSimExam() {
+  const sim = simState().activa;
+  const host = document.getElementById("sim-root");
+  const q = qById[sim.qids[sim.idx]];
+  const letters = ["A", "B", "C", "D"];
+  const multi = !!q.multiRespuesta;
+  const resp = sim.respuestas[q.id];
+  const marcada = sim.marcadas.includes(q.id);
+  const respondidas = Object.keys(sim.respuestas).length;
+  // escenario: encabezado del bloque actual
+  const scen = q.escenario
+    ? `<details class="scen" ${sim.idx === 0 || (qById[sim.qids[sim.idx - 1]].escenario || {}).titulo !== q.escenario.titulo ? "open" : ""}><summary>${qScenTitle(q.escenario)}</summary><p>${qScenText(q.escenario)}</p></details>` : "";
+  host.innerHTML = `
+    <div class="simbar">
+      <span id="sim-timer">--:--</span>
+      <span class="simpos">${sim.idx + 1}/60</span>
+      <button class="iconbtn" id="sim-lang" aria-label="Cambiar idioma">🌐 ${lang() === "es" ? "ES" : "EN"}</button>
+      <button class="iconbtn ${marcada ? "flagged" : ""}" id="sim-flag" aria-label="Marcar para revisar">🚩</button>
+      <button class="iconbtn" id="sim-grid" aria-label="Mapa de preguntas">▦</button>
+      <button class="iconbtn" id="sim-exit" aria-label="Salir">✕</button>
+    </div>
+    <div class="palette" id="sim-palette" hidden></div>
+    ${scen}
+    ${multi ? `<div class="multihint">☑️ Respuesta múltiple — marca ${correctasDe(q).length}</div>` : ""}
+    <p class="stem">${qStem(q)}</p>
+    <div class="opts" id="sim-opts">${qOpts(q).map((o, i) =>
+      `<button class="optbtn ${resp && (Array.isArray(resp) ? resp.includes(letters[i]) : resp === letters[i]) ? "picked" : ""}" data-letter="${letters[i]}"><span class="letter">${letters[i]}</span><span>${o}</span></button>`).join("")}
+    </div>
+    <div class="simnav">
+      <button class="iconbtn" id="sim-prev" ${sim.idx === 0 ? "disabled" : ""}>← Anterior</button>
+      <button class="iconbtn" id="sim-next" ${sim.idx === 59 ? "disabled" : ""}>Siguiente →</button>
+      <button class="primary" id="sim-end">Entregar (${respondidas}/60)</button>
+    </div>`;
+  // opciones
+  host.querySelectorAll("#sim-opts .optbtn").forEach((b) => b.addEventListener("click", () => {
+    const l = b.dataset.letter;
+    if (multi) {
+      const cur = new Set(Array.isArray(sim.respuestas[q.id]) ? sim.respuestas[q.id] : []);
+      cur.has(l) ? cur.delete(l) : cur.add(l);
+      if (cur.size) sim.respuestas[q.id] = [...cur].sort(); else delete sim.respuestas[q.id];
+    } else {
+      sim.respuestas[q.id] = l;
+    }
+    save(); renderSimExam();
+  }));
+  document.getElementById("sim-lang").addEventListener("click", () => {
+    S.settings.idioma = lang() === "es" ? "en" : "es"; save(); updateLangBtn(); renderSimExam();
+  });
+  document.getElementById("sim-flag").addEventListener("click", () => {
+    const i = sim.marcadas.indexOf(q.id);
+    i >= 0 ? sim.marcadas.splice(i, 1) : sim.marcadas.push(q.id);
+    save(); renderSimExam();
+  });
+  document.getElementById("sim-grid").addEventListener("click", () => {
+    const pal = document.getElementById("sim-palette");
+    if (!pal.hidden) { pal.hidden = true; return; }
+    pal.innerHTML = sim.qids.map((id, i) =>
+      `<button class="palcell ${sim.respuestas[id] ? "done" : ""} ${sim.marcadas.includes(id) ? "flag" : ""} ${i === sim.idx ? "cur" : ""}" data-i="${i}">${i + 1}</button>`).join("");
+    pal.hidden = false;
+    pal.querySelectorAll(".palcell").forEach((c) => c.addEventListener("click", () => { sim.idx = parseInt(c.dataset.i, 10); save(); renderSimExam(); }));
+  });
+  document.getElementById("sim-prev").addEventListener("click", () => { sim.idx--; save(); renderSimExam(); window.scrollTo({ top: 0 }); });
+  document.getElementById("sim-next").addEventListener("click", () => { sim.idx++; save(); renderSimExam(); window.scrollTo({ top: 0 }); });
+  document.getElementById("sim-end").addEventListener("click", () => {
+    const faltan = 60 - Object.keys(sim.respuestas).length;
+    if (confirm(faltan ? `Te faltan ${faltan} preguntas sin responder — cuentan como incorrectas. ¿Entregar?` : "¿Entregar el simulacro?")) simFinish(false);
+  });
+  document.getElementById("sim-exit").addEventListener("click", () => {
+    if (confirm("¿Salir? El simulacro queda activo y el cronómetro SIGUE corriendo (como el examen real).")) nav("home");
+  });
+  // cronómetro
+  if (simTimer) clearInterval(simTimer);
+  const tick = () => {
+    const el = document.getElementById("sim-timer");
+    if (!el) { clearInterval(simTimer); simTimer = null; return; }
+    const r = simRestante(sim);
+    el.textContent = fmtMMSS(r);
+    el.classList.toggle("warn", r <= 600);
+    if (r <= 0) { clearInterval(simTimer); simTimer = null; simFinish(true); }
+  };
+  tick();
+  simTimer = setInterval(tick, 1000);
+}
+function simFinish(porTiempo) {
+  const st = simState();
+  const sim = st.activa;
+  if (!sim) return;
+  if (simTimer) { clearInterval(simTimer); simTimer = null; }
+  const porDominio = {};
+  const items = [];
+  let aciertos = 0;
+  const d = S.dias[today()] || { vistas: 0, aciertos: 0 };
+  for (const id of sim.qids) {
+    const q = qById[id];
+    const pick = sim.respuestas[id] ?? null;
+    const ok = pick !== null && (Array.isArray(pick) ? sameSet(pick, correctasDe(q)) : pick === q.correcta);
+    if (ok) aciertos++;
+    const pd = porDominio[q.dominio] = porDominio[q.dominio] || { n: 0, ok: 0 };
+    pd.n++; if (ok) pd.ok++;
+    items.push({ id, pick, ok });
+    // alimenta el Leitner y las stats generales
+    const p = S.preguntas[id] || { caja: 0, intentos: 0, aciertos: 0, ultimoVisto: null, ultimoOk: null };
+    p.intentos++; if (ok) { p.aciertos++; p.caja = Math.min(3, p.caja + 1); } else p.caja = 0;
+    p.ultimoVisto = today(); p.ultimoOk = ok;
+    S.preguntas[id] = p;
+    d.vistas++; if (ok) d.aciertos++;
+  }
+  S.dias[today()] = d;
+  const pct = Math.round((aciertos / sim.qids.length) * 100);
+  simResultado = { fecha: today(), pct, aciertos, total: sim.qids.length, porDominio, items, porTiempo: !!porTiempo };
+  st.historial = (st.historial || []).slice(-9);
+  st.historial.push({ fecha: today(), pct, porDominio });
+  st.activa = null;
+  onGoalProgress(); save();
+  renderSimResult();
+}
+function renderSimResult() {
+  const r = simResultado;
+  const host = document.getElementById("sim-root");
+  const domNombre = { 1: "Agentic Architecture", 2: "Tool Design & MCP", 3: "Claude Code", 5: "Context Management" };
+  const colorDe = (p) => p >= 80 ? "var(--good)" : p >= 60 ? "var(--amber)" : "var(--bad)";
+  host.innerHTML = `
+    <button class="backbtn" id="sim-back">← Salir de la revisión</button>
+    <h2 style="margin-bottom:0.3rem">${r.pct >= 75 ? "¡Aprobado! 🎉" : "Resultado 📊"}${r.porTiempo ? " <span class='muted' style='font-size:0.8rem'>(entregado por tiempo)</span>" : ""}</h2>
+    <div class="panel" style="text-align:center">
+      <div style="font-size:2.2rem;font-weight:800">${r.pct}%</div>
+      <div class="muted">${r.aciertos}/${r.total} correctas · ${r.fecha} · referencia de aprobado real: 720/1000 escalado (~75% aquí)</div>
+    </div>
+    <div class="panel"><h3>% por dominio — como el score report</h3>
+      ${Object.entries(r.porDominio).sort().map(([dnum, s]) => {
+        const p = Math.round((s.ok / s.n) * 100);
+        return `<div class="domrow"><span>D${dnum} · ${domNombre[dnum] || ""}</span>
+          <span class="minibar big"><span style="width:${p}%;background:${colorDe(p)}"></span></span>
+          <span class="pct">${s.ok}/${s.n} · ${p}%</span></div>`;
+      }).join("")}
+    </div>
+    <h3 style="margin:1rem 0 0.5rem">Revisión <span class="muted" style="font-weight:400">· toca una pregunta para ver la explicación</span></h3>
+    <div id="sim-review">${r.items.map((it, i) => {
+      const q = qById[it.id];
+      const pickTxt = it.pick === null ? "sin responder" : (Array.isArray(it.pick) ? it.pick.join("+") : it.pick);
+      const corrTxt = correctasDe(q).join("+");
+      return `<details class="revrow ${it.ok ? "ok" : "no"}">
+        <summary><span class="revnum">${i + 1}</span><span class="revverdict">${it.ok ? "✔" : "✘"}</span><span class="revstem">${qStem(q)}</span></summary>
+        <div class="revbody">
+          <div class="revmeta">Tu respuesta: <b>${pickTxt}</b> · Correcta: <b>${corrTxt}</b> · D${q.dominio} · TS ${q.taskStatement} · ${q.dificultad}</div>
+          <div class="opts">${qOpts(q).map((o, j) => {
+            const l = ["A", "B", "C", "D"][j];
+            const esCorr = correctasDe(q).includes(l);
+            const esPick = it.pick !== null && (Array.isArray(it.pick) ? it.pick.includes(l) : it.pick === l);
+            return `<div class="optbtn ${esCorr ? "right" : esPick ? "wrongpick" : "dim"}" style="cursor:default"><span class="letter">${l}</span><span>${o}</span></div>`;
+          }).join("")}</div>
+          <div class="expl ${it.ok ? "" : "bad"}">${q.explicacion}${pqfHtml(q)}</div>
+        </div>
+      </details>`;
+    }).join("")}</div>`;
+  document.getElementById("sim-back").addEventListener("click", () => { simResultado = null; nav("home"); });
+}
+
 // ---------- Navegación / UI ----------
 function nav(view) {
   document.querySelectorAll(".view").forEach((v) => v.classList.remove("active"));
   document.getElementById("view-" + view).classList.add("active");
+  if (view !== "simulacro" && simTimer) { clearInterval(simTimer); simTimer = null; }
   if (view === "home") renderHome();
   if (view === "dashboard") renderDashboard();
   if (view === "glosario") renderGlosario();
+  if (view === "simulacro") renderSimulacro();
   window.scrollTo({ top: 0 });
 }
 let toastT = null;
